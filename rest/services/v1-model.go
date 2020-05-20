@@ -13,8 +13,8 @@ type RestService interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-func NewV1DnsRootRestService(logger log.Logger, hostBaseUrl string) RestService {
-	return &v1.RestRootService{
+func NewV1RegistryRootRestService(logger log.Logger, hostBaseUrl string) RestService {
+	return &v1.RestRegistryRootService{
 		Log:     logger,
 		BaseUrl: hostBaseUrl,
 	}

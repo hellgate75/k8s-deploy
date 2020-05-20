@@ -78,3 +78,4 @@ type TemplateDataType struct {
 type TemplateResponse struct {
 	Templates []TemplateDataType `yaml:"template" json:"template" xml:"template"`
 }
+

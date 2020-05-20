@@ -2,7 +2,7 @@
 // Use of this source code is governed by a LGPL-style
 // license that can be found in the LICENSE file.
 
-package main
+package repository
 
 import (
 	"errors"

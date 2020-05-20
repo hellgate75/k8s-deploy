@@ -11,14 +11,14 @@ func InitPackage() {
 //	}
 }
 
-type ChartRequest struct {
+type ChartDeployRequest struct {
 	ChartName		string
 	ChartVersion	string
 	Namespace		string
 	KubeConfig		string
 }
 
-type KubeFileRequest struct {
+type KubeFileDeployRequest struct {
 	ChartName		string
 	ChartVersion	string
 	Namespace		string
@@ -32,7 +32,7 @@ type HelmResponse struct {
 	Error		error
 }
 
-func ExecuteChartRequest(req ChartRequest) HelmResponse {
+func ExecuteChartRequest(req ChartDeployRequest) HelmResponse {
 	return HelmResponse {
 		Code: 404,
 		Error: errors.New("Not Implemented!!"),
@@ -40,7 +40,7 @@ func ExecuteChartRequest(req ChartRequest) HelmResponse {
 }
 
 
-func ExecuteKubeRequest(req KubeFileRequest) HelmResponse {
+func ExecuteKubeRequest(req KubeFileDeployRequest) HelmResponse {
 	return HelmResponse {
 		Code: 404,
 		Error: errors.New("Not Implemented!!"),
