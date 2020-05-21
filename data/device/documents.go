@@ -195,7 +195,7 @@ func (dm *_documentsManager) ListKubeFileVersions(q  ...model.Query)  model.Data
 	}
 }
 
-func getDocumentDataManager(baseFolder string, repo *model.Repository) model.DocumentsDataManager {
+func GetDocumentDataManager(baseFolder string, repo *model.Repository) model.DocumentsDataManager {
 	return &_documentsManager {
 		baseDataFolder: baseFolder,
 		repo: repo,

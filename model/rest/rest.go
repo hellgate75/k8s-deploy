@@ -6,67 +6,53 @@ package rest
 
 import (
 	"github.com/hellgate75/k8s-deploy/model"
-	"net"
-	"strings"
 )
 
 const (
-	DefaultStorageFolder     string = "/var/k8s-deploy"
-	DefaultConfigFolder      string = "/etc/k8s-deploy"
-	DefaultLogFileFolder     string = "/var/log/k8s-deploy"
-	DefaultLogFileLevel      string = "DEBUG"
-	DefaultRestServerPort           = 8089
-	DefaultIpAddress                = "0.0.0.0"
+	DefaultDatabaseNamePrefix  		string = "default-k8s-deploy"
+	DefaultRepositoryStorageFolder  string = "/var/k8s-deploy/repository"
+	DefaultSchedulerStorageFolder   string = "/var/k8s-deploy/scheduler"
+	DefaultExecutorStorageFolder    string = "/var/k8s-deploy/scheduler"
+	DefaultConfigFolder             string = "/etc/k8s-deploy"
+	DefaultLogFileFolder            string = "/var/log/k8s-deploy"
+	DefaultLogFileLevel             string = "DEBUG"
+	DefaultRepositoryRestServerPort int    = 8089
+	DefaultSchedulerRestServerPort	 int    = 8090
+	DefaultExecutorRestServerPort   int    = 8091
+	DefaultIpAddress                       = "0.0.0.0"
 )
 
-type GroupRequest struct {
-	Name       string        `yaml:"name" json:"name" xml:"name"`
-	Forwarders []net.UDPAddr `yaml:"fowarders" json:"fowarders" xml:"fowarders"`
-	Domains    []string      `yaml:"domains" json:"domains" xml:"domains"`
-}
-
-type GroupFilterRequest struct {
-	Filter struct {
-		Name   string `yaml:"name" json:"name" xml:"name"`
-		Domain string `yaml:"domain" json:"domain" xml:"domain"`
-	}
-}
-
-type Action string
-
-const (
-	AddResoource    Action = "ADD"
-	UpdateResoource Action = "UPDATE"
-	DeleteResoource Action = "DELTE"
-)
-
-func (a Action) Equals(act Action) bool {
-	return string(act) != "" && strings.ToUpper(string(act)) == strings.ToUpper(string(a))
-}
-
-func (a Action) Same(act string) bool {
-	return act != "" && strings.ToUpper(act) == strings.ToUpper(string(a))
-}
-
-func (a Action) String(act string) string {
-	return strings.ToUpper(string(a))
-}
-
-type Field string
-
-func (f Field) Equals(field Field) bool {
-	return string(field) != "" && strings.ToUpper(string(field)) == strings.ToUpper(string(f))
-}
-
-type UpdateListForm struct {
+type UpdateListItem struct {
+	Name  string `yaml:"name" json:"name" xml:"name"`
 	Value string `yaml:"value" json:"value" xml:"value"`
 	Index int    `yaml:"index" json:"index" xml:"index"`
 }
 
-type UpdateRequestForm struct {
-	ListData   UpdateListForm `yaml:"fromList" json:"fromList" xml:"from-list"`
-	RecordData model.Request  `yaml:"fromRecord" json:"fromRecord" xml:"from-record"`
-	NewValue   interface{}    `yaml:"value" json:"value" xml:"value"`
+
+type UpdateItem struct {
+	Name  string `yaml:"name" json:"name" xml:"name"`
+	Value string `yaml:"value" json:"value" xml:"value"`
+}
+
+type UpdateRequest struct {
+	ListData 	[]UpdateListItem 	`yaml:"listItems,omitempty" json:"listItems,omitempty" xml:"list-item,omitempty"`
+	RecordData 	[]UpdateItem 		`yaml:"items,omitempty" json:"items,omitempty" xml:"item,omitempty"`
+	Request 	model.Request  		`yaml:"request" json:"request" xml:"request"`
+}
+
+type DeleteListItem struct {
+	Name  string `yaml:"name" json:"name" xml:"name"`
+	Index int    `yaml:"index" json:"index" xml:"index"`
+}
+
+type DeleteItem struct {
+	Name  string `yaml:"name" json:"name" xml:"name"`
+}
+
+type DeleteRequest struct {
+	ListData 	[]DeleteListItem 	`yaml:"listItems,omitempty" json:"listItems,omitempty" xml:"list-item,omitempty"`
+	RecordData 	[]DeleteItem 		`yaml:"items,omitempty" json:"items,omitempty" xml:"item,omitempty"`
+	Request 	model.Request  		`yaml:"request" json:"request" xml:"request"`
 }
 
 type TemplateDataType struct {

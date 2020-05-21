@@ -21,31 +21,26 @@ type ApiReferenceItem struct {
 type ApiReference struct {
 	CurrentUrl		string					`yaml:"_self" json:"_self" xml:"self"`
 	CurrentMethod	string					`yaml:"_method" json:"_method" xml:"method"`
-	Urls  			[]ApiReferenceItem		`yaml:"urls" json:"url" xml:"url"`
+	Urls  			[]ApiReferenceItem		`yaml:"urls" json:"urls" xml:"url"`
 }
 
 
-type Subject string
-type Scope string
+type ResourceType string
 type Aggregator string
 type Oper string
 type State string
 const(
-	SubjectRepositories		Subject = "repo"
-	SubjectCharts			Subject = "charts"
-	SubjectChart			Subject = "chart"
-	SubjectKubeFiles		Subject = "kubefiles"
-	SubjectKubeFile			Subject = "kubefile"
-	SubjectDeploys			Subject = "deploys"
-	SubjectDeploy			Subject = "deploy"
-	SubjectJobs				Subject = "jobs"
-	SubjectJob				Subject = "job"
-	SubjectProjects			Subject = "projects"
-	SubjectProject			Subject = "project"
-
-	ScopeTemplate			Subject = "template"
-	ScopeOutput				Subject = "list"
-	ScopeAction				Subject = "action"
+	ResourceTypeRepositories ResourceType = "repository"
+	ResourceTypeCharts       ResourceType = "charts"
+	ResourceTypeChart        ResourceType = "chart"
+	ResourceTypeKubeFiles    ResourceType = "kubefiles"
+	ResourceTypeKubeFile     ResourceType = "kubefile"
+	ResourceTypeDeploys      ResourceType = "deploys"
+	ResourceTypeDeploy       ResourceType = "deploy"
+	ResourceTypeJobs         ResourceType = "jobs"
+	ResourceTypeJob          ResourceType = "job"
+	ResourceTypeProjects     ResourceType = "projects"
+	ResourceTypeProject      ResourceType = "project"
 
 	AggregatorEq			Aggregator = "eq"
 	AggregatorIn			Aggregator = "in"
@@ -106,21 +101,6 @@ func (q *Query) ToJson() (string, error) {
 		return "", err
 	}
 	return string(d), nil
-}
-
-func (q *Query) String() string {
-	s, err := q.ToJson()
-	if err != nil {
-		return fmt.Sprintf("<error:%s>", err.Error())
-	}
-	return s
-}
-
-type Request struct {
-	Subject		Subject		`yaml:"subject" json:"subject" xml:"subject"`
-	Scope		Scope		`yaml:"scope" json:"scope" xml:"scope"`
-	Query		Query		`yaml:"query,omitempty" json:"query,omitempty" xml:"query,omitempty"`
-	Data		interface{}	`yaml:"data,omitempty" json:"data,omitempty" xml:"data,omitempty"`
 }
 
 func (req *Request) ToJson() (string, error) {
@@ -309,6 +289,7 @@ type Project struct {
 	Version		string				`yaml:"version" json:"version" xml:"version"`
 	Versions	[]ProjectVersion	`yaml:"versions" json:"versions" xml:"version"`
 	State		State				`yaml:"state" json:"state" xml:"state"`
+	ReadOnly	bool				`yaml:"readOnly" json:"readOnly" xml:"read-only"`
 }
 
 func (p *Project) ToJson() (string, error) {

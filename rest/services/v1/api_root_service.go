@@ -1,6 +1,7 @@
 package v1
 
 import (
+	"fmt"
 	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 	"github.com/hellgate75/k8s-deploy/model/rest"
@@ -42,6 +43,8 @@ type RestRegistryRootResponse struct {
 type RestRegistryRootService struct {
 	Log     log.Logger
 	BaseUrl string
+	Configuration model.KubeRepoConfig
+	DataManager model.RepositoryDataManager
 }
 
 // Create is HTTP handler of POST model.Request.
@@ -64,14 +67,17 @@ func (s *RestRegistryRootService) Create(w http.ResponseWriter, r *http.Request)
 // Use for reading existed records on DNS server.
 func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 	var action = r.URL.Query().Get("action")
+	var method = r.URL.Query().Get("method")
 	if strings.ToLower(action) == "template" {
 		var templates = make([]rest.TemplateDataType, 0)
-		templates = append(templates, rest.TemplateDataType{
-			Method:  "GET",
-			Header:  []string{},
-			Query:   []string{"action=template"},
-			Request: nil,
-		})
+		if method == "" || strings.ToLower(method) == "get" {
+			templates = append(templates, rest.TemplateDataType{
+				Method:  "GET",
+				Header:  []string{},
+				Query:   []string{"action=template"},
+				Request: nil,
+			})
+		}
 		tErr := utils.RestParseResponse(w, r,
 			&rest.TemplateResponse{
 				Templates: templates,
@@ -84,12 +90,24 @@ func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 	}
 //	groups := s.Store.GetGroupBucket().ListGroups()
 	var list = make([]string, 0)
+	var message = "OK"
+	resp := s.DataManager.ListRepositories()
+	if resp.Success {
+		if resp.ResponseObjects != nil {
+			for _, obj := range resp.ResponseObjects {
+				var r = obj.(model.Repository)
+				list = append(list, fmt.Sprintf("%s:%s", r.Id, r.Name))
+			}
+		}
+	} else {
+		message = fmt.Sprintf("ERROR:: %s", resp.Message)
+	}
 //	for _, g := range groups {
 //		list = append(list, g.Name)
 //	}
 	response := model.Response{
 		Status:  http.StatusOK,
-		Message: "OK",
+		Message: message,
 		Reference: getRootRepositoryApiReference("POST"),
 		Data:    RestRegistryRootResponse{Repositories: list},
 	}

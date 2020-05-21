@@ -65,7 +65,7 @@ func (rn *repositoryManager) GetRepositoryByName(name string) *model.Repository 
 }
 
 func (rn *repositoryManager) AccessRepository(r model.Repository) *model.DocumentsDataManager {
-	dm := getDocumentDataManager(rn.baseDataFolder, &r)
+	dm := GetDocumentDataManager(rn.baseDataFolder, &r)
 	return &dm
 }
 
@@ -78,7 +78,7 @@ func (rn *repositoryManager) OverrideRepository(id string, r model.Repository)  
 }
 
 
-func getRepositoryDataManager(baseFolder string) model.RepositoryDataManager {
+func GetRepositoryDataManager(baseFolder string) model.RepositoryDataManager {
 	return &repositoryManager {
 		baseDataFolder: baseFolder,
 	}

@@ -98,6 +98,11 @@ func downloadInstallHelm() error {
 	return nil
 }
 
+func moveToBinaryFolder(file string) {
+
+	//getHome
+}
+
 func downloadInstallKubectl() error {
 	fmt.Printf("Installing Kubectl ...\n")
 	version := getKubectlLatestVersion()

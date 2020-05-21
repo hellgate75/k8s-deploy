@@ -28,23 +28,24 @@ func (i *ArgumentsList) Get(index int) string {
 }
 
 type KubeRepoConfig struct {
-	DataDirPath         string `yaml:"dataDir" json:"dataDir" xml:"data-dir"`
-	ConfigDirPath       string `yaml:"configDir" json:"configDir" xml:"config-dir"`
-	ListenIP            string `yaml:"listenIp" json:"listenIp" xml:"listen-ip"`
-	ListenPort          int    `yaml:"listenPort" json:"listenPort" xml:"listen-port"`
-	TlsCert             string `yaml:"tlsCertFilePath" json:"tlsCertFilePath" xml:"tls-cert-file-path"`
-	TlsKey              string `yaml:"tlsKeyFilePath" json:"tlsKeyFilePath" xml:"tls-key-file-path"`
-	EnableFileLogging   bool   `yaml:"enableFileLogging" json:"enableFileLogging" xml:"enable-file-logging"`
-	LogVerbosity        string `yaml:"logVerbosity" json:"logVerbosity" xml:"log-verbosity"`
-	LogFilePath         string `yaml:"logFilePath" json:"logFilePath" xml:"log-file-path"`
-	EnableLogRotate     bool   `yaml:"enableLogRotate" json:"enableLogRotate" xml:"enable-log-rotate"`
-	LogMaxFileSize      int64  `yaml:"logMaxFileSize" json:"logMaxFileSize" xml:"log-max-file-size"`
-	LogFileCount        int    `yaml:"logFileCount" json:"logFileCount" xml:"log-file-count"`
-	MongoDbEnabled 		bool	`yaml:"mongoDbEnabled" json:"mongoDbEnabled" xml:"mongo-db-enabled"`
-	MongoDbHost 		string	`yaml:"mongoDbHost" json:"mongoDbHost" xml:"mongo-db-host"`
-	MongoDbPort 		int		`yaml:"mongoDbPort" json:"mongoDbPort" xml:"mongo-db-port"`
-	MongoDbUser 		string	`yaml:"mongoDbUser" json:"mongoDbUser" xml:"mongo-db-user"`
-	MongoDbPassword 	string	`yaml:"mongoDbPassword" json:"mongoDbPassword" xml:"mongo-db-password"`
+	DataDirPath         	string `yaml:"dataDir" json:"dataDir" xml:"data-dir"`
+	ConfigDirPath       	string `yaml:"configDir" json:"configDir" xml:"config-dir"`
+	ListenIP            	string `yaml:"listenIp" json:"listenIp" xml:"listen-ip"`
+	ListenPort          	int    `yaml:"listenPort" json:"listenPort" xml:"listen-port"`
+	TlsCert             	string `yaml:"tlsCertFilePath" json:"tlsCertFilePath" xml:"tls-cert-file-path"`
+	TlsKey              	string `yaml:"tlsKeyFilePath" json:"tlsKeyFilePath" xml:"tls-key-file-path"`
+	EnableFileLogging   	bool   `yaml:"enableFileLogging" json:"enableFileLogging" xml:"enable-file-logging"`
+	LogVerbosity        	string `yaml:"logVerbosity" json:"logVerbosity" xml:"log-verbosity"`
+	LogFilePath         	string `yaml:"logFilePath" json:"logFilePath" xml:"log-file-path"`
+	EnableLogRotate     	bool   `yaml:"enableLogRotate" json:"enableLogRotate" xml:"enable-log-rotate"`
+	LogMaxFileSize      	int64  `yaml:"logMaxFileSize" json:"logMaxFileSize" xml:"log-max-file-size"`
+	LogFileCount      int    `yaml:"logFileCount" json:"logFileCount" xml:"log-file-count"`
+	MongoDbEnabled    bool   `yaml:"mongoDbEnabled" json:"mongoDbEnabled" xml:"mongo-db-enabled"`
+	MongoDbHost       string `yaml:"mongoDbHost" json:"mongoDbHost" xml:"mongo-db-host"`
+	MongoDbPort       int    `yaml:"mongoDbPort" json:"mongoDbPort" xml:"mongo-db-port"`
+	MongoDbUser       string `yaml:"mongoDbUser" json:"mongoDbUser" xml:"mongo-db-user"`
+	MongoDbPassword   string `yaml:"mongoDbPassword" json:"mongoDbPassword" xml:"mongo-db-password"`
+	StorageNamePrefix string `yaml:"mongoDbPrefix" json:"mongoDbPrefix" xml:"mongo-db-prefix"`
 }
 
 func (conf KubeRepoConfig) ToJson() string {

@@ -12,7 +12,7 @@ func getRepositoryFolder(basePath string, repoName string) string {
 }
 
 type repositoryManager struct {
-	conn	*database.Connection
+	conn	database.Connection
 }
 
 func (rn *repositoryManager) ListRepositories()  model.DataResponse {
@@ -66,7 +66,7 @@ func (rn *repositoryManager) GetRepositoryByName(name string) *model.Repository 
 }
 
 func (rn *repositoryManager) AccessRepository(r model.Repository) *model.DocumentsDataManager {
-	dm := getDocumentDataManager(rn.baseDataFolder, &r)
+	dm := GetDocumentDataManager(rn.conn, &r)
 	return &dm
 }
 
@@ -79,7 +79,7 @@ func (rn *repositoryManager) OverrideRepository(id string, r model.Repository)  
 }
 
 
-func getRepositoryDataManager(conn *database.Connection) model.RepositoryDataManager {
+func GetRepositoryDataManager(conn database.Connection) model.RepositoryDataManager {
 	return &repositoryManager {
 		conn: conn,
 	}

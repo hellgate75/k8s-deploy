@@ -6,8 +6,8 @@ import (
 )
 
 type _documentsManager struct {
-	conn	*database.Connection
-	repo 	model.Repository
+	conn	database.Connection
+	repo 	*model.Repository
 }
 
 func (dm *_documentsManager) AddChart(c model.Chart)  model.DataResponse {
@@ -198,7 +198,7 @@ func (dm *_documentsManager) ListKubeFileVersions(q  ...model.Query)  model.Data
 	}
 }
 
-func getDocumentDataManager(conn *database.Connection, repo model.Repository) model.DocumentsDataManager {
+func GetDocumentDataManager(conn database.Connection, repo *model.Repository) model.DocumentsDataManager {
 	return &_documentsManager {
 		conn: conn,
 		repo: repo,

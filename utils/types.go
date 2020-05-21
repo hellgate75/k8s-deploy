@@ -6,6 +6,7 @@ package utils
 
 import (
 	"errors"
+	"github.com/google/uuid"
 	"regexp"
 	"strconv"
 	"strings"
@@ -60,6 +61,10 @@ func ReplaceQuestionUnrelated(val string) (string, error) {
 		value = value[:len(value)-1]
 	}
 	return value, nil
+}
+
+func NewUID() string {
+	return uuid.New().String()
 }
 
 func ConvertKeyToId(key string) string {
