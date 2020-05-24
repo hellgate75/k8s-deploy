@@ -10,7 +10,7 @@ import (
 
 const (
 	DefaultDatabaseNamePrefix  		string = "default-k8s-deploy"
-	DefaultRepositoryStorageFolder  string = "/var/k8s-deploy/repository"
+	DefaultRepositoryStorageFolder  string = "/var/k8s-deploy/k8srepo"
 	DefaultSchedulerStorageFolder   string = "/var/k8s-deploy/scheduler"
 	DefaultExecutorStorageFolder    string = "/var/k8s-deploy/scheduler"
 	DefaultConfigFolder             string = "/etc/k8s-deploy"

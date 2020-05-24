@@ -119,7 +119,7 @@ func main() {
 		logger.Warnf("Initialize %s from config file ...", ApplicationFullName)
 		logger.Warnf("%s config folder: %s", ApplicationFullName, configDirPath)
 		var config model.KubeRepoConfig
-		cLErr := model.LoadConfig(configDirPath, "k8s-deploy-repository", &config)
+		cLErr := model.LoadConfig(configDirPath, "k8s-deploy-k8srepo", &config)
 		if cLErr != nil {
 			logger.Errorf("%s is unable to load default config from file: ", ApplicationFullName, cLErr)
 		} else {

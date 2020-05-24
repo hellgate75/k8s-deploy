@@ -3,6 +3,7 @@ package integration
 import (
 	"errors"
 	"fmt"
+	"github.com/hellgate75/k8s-deploy/utils"
 	"io/ioutil"
 	"net/http"
 	"os"
@@ -27,6 +28,17 @@ func executeCommand(command string, args ...string) (string, error) {
 		return "", err
 	}
 	return fmt.Sprintf("%s", stdoutStderr), err
+}
+
+func checkPath() {
+	d, err := utils.GetExecutionDir()
+	if err != nil {
+		d, _ = os.Getwd()
+	}
+	var lst = utils.GetOSPathList()
+	if ! utils.StringsListContainItem(d, lst, false) {
+		utils.AddToOSPathList(d)
+	}
 }
 
 func checkPresenctOfHelm() bool {
@@ -76,13 +88,16 @@ func downloadInstallHelm() error {
 	dir := os.TempDir()
 	file := fmt.Sprintf("%s%c%s", dir, os.PathSeparator, "helm")
 	var url string
+	var extension = "zip"
 	if runtime.GOOS == "windows" {
 		file = file + ".zip"
 		url = fmt.Sprintf("https://get.helm.sh/helm-%s-windows-amd64.zip", version)
 	} else if runtime.GOOS == "linux" {
+		extension="tar.gz"
 		file = file + ".tar.gz"
 		url = fmt.Sprintf("https://get.helm.sh/helm-%s-linux-arm64.tar.gz", version)
 	} else if runtime.GOOS == "darwin" {
+		extension="tar.gz"
 		file = file + ".tar.gz"
 		url = fmt.Sprintf("https://get.helm.sh/helm-%s-darwin-amd64.tar.gz", version)
 	} else {
@@ -95,11 +110,34 @@ func downloadInstallHelm() error {
 		fmt.Printf("Errors downloading Helm: %v\n", err)
 		return err
 	}
+	archivePath, err := moveToBinaryFolder(file)
+	err = uncompressFile(archivePath, extension == "zip", "helm")
+	utils.DeleteFileOrFolder(archivePath)
+	return err
+}
+
+
+func uncompressFile(file string, zip bool, filter string) error {
+	d, err := utils.GetExecutionDir()
+	if err != nil {
+		d, _ = os.Getwd()
+	}
+	if zip {
+		utils.ZipUnCompressFilter(file, d, filter)
+	} else {
+		utils.TarUnCompressFilter(file, d, true, filter)
+	}
 	return nil
 }
 
-func moveToBinaryFolder(file string) {
-
+func moveToBinaryFolder(file string) (string, error) {
+	d, err := utils.GetExecutionDir()
+	if err != nil {
+		d, _ = os.Getwd()
+	}
+	fmt.Printf("Moving file: %s to folder: %s\n", file, d)
+	_, path, err := utils.MoveFileToFolder(file, d)
+	return path, err
 	//getHome
 }
 
@@ -127,7 +165,8 @@ func downloadInstallKubectl() error {
 		fmt.Printf("Errors downloading Kubectl: %v\n", err)
 		return err
 	}
-	return nil
+	_, err = moveToBinaryFolder(file)
+	return err
 }
 
 func downloadFileTo(url string, file string) error {

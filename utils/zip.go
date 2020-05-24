@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func zipCompress(source, target string) error {
+func ZipCompress(source, target string) error {
 	zipfile, err := os.Create(target)
 	if err != nil {
 		return err
@@ -69,7 +69,7 @@ func zipCompress(source, target string) error {
 	return err
 }
 
-func zipUnCompress(archive, target string) error {
+func ZipUnCompress(archive, target string) error {
 	reader, err := zip.OpenReader(archive)
 	if err != nil {
 		return err
@@ -103,5 +103,48 @@ func zipUnCompress(archive, target string) error {
 		}
 	}
 
+	return nil
+}
+
+func ZipUnCompressFilter(archive, target string, filter string) error {
+	reader, err := zip.OpenReader(archive)
+	if err != nil {
+		return err
+	}
+
+	if err := os.MkdirAll(target, 0755); err != nil {
+		return err
+	}
+
+	for _, file := range reader.File {
+		path := filepath.Join(target, file.Name)
+		if file.FileInfo().IsDir() {
+			if (strings.Contains(file.Name, filter)) {
+				os.MkdirAll(path, file.Mode())
+			}
+			continue
+		}
+
+		fileReader, err := file.Open()
+		if err != nil {
+			return err
+		}
+		defer fileReader.Close()
+		if  strings.Contains(path, filter) {
+			_, name := filepath.Split(file.Name)
+			path = filepath.Join(target, name)
+			targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())
+			if err != nil {
+				return err
+			}
+			defer targetFile.Close()
+
+			if _, err := io.Copy(targetFile, fileReader); err != nil {
+				return err
+			}
+		} else {
+			continue
+		}
+	}
 	return nil
 }

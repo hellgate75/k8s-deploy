@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 var (
@@ -17,11 +18,15 @@ var (
 	ErrIPInvalid      = errors.New("Invalid IP address")
 )
 
-func getInteger(v string) (int, bool) {
+func StringToInteger(v string) (int, bool) {
 	if n, err := strconv.Atoi(v); err == nil {
 		return n, true
 	}
 	return 0, false
+}
+
+func StringToDateTime(v string, layout string) (time.Time, error) {
+	return time.Parse(v, layout)
 }
 
 func StringsListContainItem(elem string, elems []string, ignoreCase bool) bool {
@@ -51,7 +56,7 @@ func GenericListContainItem(elem interface{}, elems []interface{}) bool {
 	return false
 }
 
-func ReplaceQuestionUnrelated(val string) (string, error) {
+func ReplaceSimpleTextUnrelated(val string) (string, error) {
 	expr, err := regexp.Compile("[^a-zA-Z0-9.-]+")
 	if err != nil {
 		return val, err

@@ -36,7 +36,7 @@ func getRootRepositoryApiReference(method string) model.ApiReference {
 }
 
 type RestRegistryRootResponse struct {
-	Repositories []string `yaml:"repositories,omitempty" json:"repositories,omitempty" xml:"repository,omitempty"`
+	Repositories []string `yaml:"repositories,omitempty" json:"repositories,omitempty" xml:"k8srepo,omitempty"`
 }
 
 // RestRegistryRootService is an implementation of RestService interface.

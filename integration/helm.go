@@ -3,12 +3,13 @@ package integration
 import "errors"
 
 func InitPackage() {
-//	if ! checkPresenctOfHelm() {
+	checkPath()
+	if ! checkPresenctOfHelm() {
 		downloadInstallHelm()
-//	}
-//	if ! checkPresenctOfKubectl() {
+	}
+	if ! checkPresenctOfKubectl() {
 		downloadInstallKubectl()
-//	}
+	}
 }
 
 type ChartDeployRequest struct {

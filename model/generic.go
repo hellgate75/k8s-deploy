@@ -30,7 +30,7 @@ type Aggregator string
 type Oper string
 type State string
 const(
-	ResourceTypeRepositories ResourceType = "repository"
+	ResourceTypeRepositories ResourceType = "k8srepo"
 	ResourceTypeCharts       ResourceType = "charts"
 	ResourceTypeChart        ResourceType = "chart"
 	ResourceTypeKubeFiles    ResourceType = "kubefiles"

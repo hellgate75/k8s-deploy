@@ -12,7 +12,7 @@ type DataResponse struct {
 	ResponseObjects	[]interface{}
 }
 
-// Represents the repository documents data storage manager
+// Represents the k8srepo documents data storage manager
 type DocumentsDataManager interface {
 	// Add new chart data
 	AddChart(c Chart) DataResponse
@@ -46,21 +46,21 @@ type DocumentsDataManager interface {
 	UpdateChartVersions(c Chart, v Version, q ...Query) DataResponse
 	// Update one or more Kube-file versions
 	UpdateKubeFileVersions(f KubeFile, v Version, q ...Query) DataResponse
-	// Query over repository Charts
+	// Query over k8srepo Charts
 	QueryCharts(q ...Query) DataResponse
-	// Query over repository Kube-files
+	// Query over k8srepo Kube-files
 	QueryKubeFiles(q ...Query) DataResponse
-	// Query over repository Chart versions
+	// Query over k8srepo Chart versions
 	QueryChartVersions(c Chart, q ...Query) DataResponse
-	// Query over repository Kube-file versions
+	// Query over k8srepo Kube-file versions
 	QueryKubeFileVersions(f KubeFile, q ...Query) DataResponse
-	// List all repository Charts
+	// List all k8srepo Charts
 	ListCharts() DataResponse
-	// List all repository Kube-files
+	// List all k8srepo Kube-files
 	ListKubeFiles() DataResponse
-	// List repository Chart versions
+	// List k8srepo Chart versions
 	ListChartVersions(q ...Query) DataResponse
-	// List all repository Kube-file versions
+	// List all k8srepo Kube-file versions
 	ListKubeFileVersions(q ...Query) DataResponse
 }
 
@@ -68,7 +68,7 @@ type DocumentsDataManager interface {
 type RepositoryDataManager interface {
 	//List all repositories
 	ListRepositories() DataResponse
-	//Add new repository
+	//Add new k8srepo
 	AddRepository(r Repository) DataResponse
 	//Delete one or more repositories
 	DeleteRepositories(q ...Query) DataResponse
@@ -78,13 +78,13 @@ type RepositoryDataManager interface {
 	ClearRepository(id string) DataResponse
 	//Clear a repositories data entities selecting by name
 	ClearRepositoryByName(name string) DataResponse
-	//Collect a repository data entities selecting by id
+	//Collect a k8srepo data entities selecting by id
 	GetRepository(id string) *Repository
-	//Collect a repository data entities selecting by name
+	//Collect a k8srepo data entities selecting by name
 	GetRepositoryByName(name string) *Repository
 	//Access Repository data via model.DocumentsDataManager
 	AccessRepository(r Repository) *DocumentsDataManager
-	//Override a repository selecting via id
+	//Override a k8srepo selecting via id
 	OverrideRepository(id string, r Repository) DataResponse
 }
 

@@ -6,6 +6,7 @@ require (
 	github.com/google/uuid v1.1.1
 	github.com/gookit/color v1.2.5
 	github.com/gorilla/mux v1.7.4
-	github.com/hellgate75/go-services v0.0.0-20200520202025-382a1c811b4b
+	github.com/hellgate75/go-services v0.0.1
+	github.com/pkg/errors v0.8.1
 	gopkg.in/yaml.v2 v2.3.0
 )
