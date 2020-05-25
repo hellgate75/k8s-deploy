@@ -36,10 +36,15 @@ func CleanCreateFolder(fileOrFolder string) error {
 // Delete a folder if it exists
 func DeleteFileOrFolder(fileOrFolder string) error {
 	if st, err := os.Stat(fileOrFolder); err == nil {
+		_ = os.Chmod(fileOrFolder, 660)
 		if st.IsDir() {
+			fmt.Printf("Deleting folder %s...\n", fileOrFolder)
 			return os.RemoveAll(fileOrFolder)
 		}
+		fmt.Printf("Deleting file %s...\n", fileOrFolder)
 		return os.Remove(fileOrFolder)
+	} else {
+		fmt.Printf("File or folder %s doean't exist!!", fileOrFolder)
 	}
 	return nil
 }

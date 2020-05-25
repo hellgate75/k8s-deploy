@@ -7,28 +7,9 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
-	"os/exec"
 	"runtime"
 	"strings"
 )
-
-func executeCommand(command string, args ...string) (string, error) {
-	var err error
-	defer func() {
-		if r := recover(); r != nil {
-			err = errors.New(fmt.Sprintf("%v", r))
-		}
-	}()
-	var cmd = exec.Command(command, args...)
-	if cmd == nil {
-		return "", errors.New("Nil command cannot be executed")
-	}
-	stdoutStderr, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%s", stdoutStderr), err
-}
 
 func checkPath() {
 	d, err := utils.GetExecutionDir()
@@ -42,12 +23,12 @@ func checkPath() {
 }
 
 func checkPresenctOfHelm() bool {
-	out, err := executeCommand("helm", "--help")
+	out, err := utils.ExecuteCommand("helm", "--help")
 	return err == nil && len(out) > 0
 }
 
 func checkPresenctOfKubectl() bool {
-	out, err := executeCommand("kubectl", "--help")
+	out, err := utils.ExecuteCommand("kubectl", "--help")
 	return err == nil && len(out) > 0
 }
 
@@ -110,9 +91,17 @@ func downloadInstallHelm() error {
 		fmt.Printf("Errors downloading Helm: %v\n", err)
 		return err
 	}
+	fmt.Printf("Move file: %s to binary folder\n", file)
 	archivePath, err := moveToBinaryFolder(file)
+	fmt.Printf("Uncompressing archive: %s...\n", archivePath)
 	err = uncompressFile(archivePath, extension == "zip", "helm")
-	utils.DeleteFileOrFolder(archivePath)
+	fmt.Printf("Delete archive in path: %s\n", archivePath)
+	if err == nil {
+		err = utils.DeleteFileOrFolder(archivePath)
+	} else {
+		errX := utils.DeleteFileOrFolder(archivePath)
+		fmt.Printf("Error removing emergency the file %s -> Error: %v", archivePath, errX)
+	}
 	return err
 }
 
@@ -123,9 +112,9 @@ func uncompressFile(file string, zip bool, filter string) error {
 		d, _ = os.Getwd()
 	}
 	if zip {
-		utils.ZipUnCompressFilter(file, d, filter)
+		err = utils.ZipUnCompressFilter(file, d, filter)
 	} else {
-		utils.TarUnCompressFilter(file, d, true, filter)
+		err = utils.TarUnCompressFilter(file, d, true, filter)
 	}
 	return nil
 }

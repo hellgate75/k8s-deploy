@@ -109,10 +109,10 @@ func TarCompress(source, target string, compress bool) error {
 
 func TarUnCompress(archive, target string, uncompress bool) error {
 	reader, err := os.Open(archive)
-	defer reader.Close()
 	if err != nil {
 		return err
 	}
+	defer reader.Close()
 	var tr *tar.Reader
 	if uncompress {
 		gr, err := gzip.NewReader(reader)
@@ -155,10 +155,10 @@ func TarUnCompress(archive, target string, uncompress bool) error {
 
 func TarUnCompressFilter(archive, target string, uncompress bool, filter string) error {
 	reader, err := os.Open(archive)
-	defer reader.Close()
 	if err != nil {
 		return err
 	}
+	defer reader.Close()
 	var tr *tar.Reader
 	if uncompress {
 		gr, err := gzip.NewReader(reader)

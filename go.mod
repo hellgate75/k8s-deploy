@@ -8,5 +8,6 @@ require (
 	github.com/gorilla/mux v1.7.4
 	github.com/hellgate75/go-services v0.0.1
 	github.com/pkg/errors v0.8.1
+	golang.org/x/tools v0.0.0-20190531172133-b3315ee88b7d
 	gopkg.in/yaml.v2 v2.3.0
 )

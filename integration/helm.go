@@ -1,14 +1,23 @@
 package integration
 
-import "errors"
+import (
+	"errors"
+	"fmt"
+)
 
 func InitPackage() {
 	checkPath()
 	if ! checkPresenctOfHelm() {
-		downloadInstallHelm()
+		err := downloadInstallHelm()
+		if err != nil {
+			fmt.Printf("Problems during installation of helm: %v\n", err)
+		}
 	}
 	if ! checkPresenctOfKubectl() {
-		downloadInstallKubectl()
+		err := downloadInstallKubectl()
+		if err != nil {
+			fmt.Printf("Problems during installation of kubectl: %v\n", err)
+		}
 	}
 }
 

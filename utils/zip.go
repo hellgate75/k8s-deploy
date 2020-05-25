@@ -74,7 +74,7 @@ func ZipUnCompress(archive, target string) error {
 	if err != nil {
 		return err
 	}
-
+	defer reader.Close()
 	if err := os.MkdirAll(target, 0755); err != nil {
 		return err
 	}
@@ -111,7 +111,7 @@ func ZipUnCompressFilter(archive, target string, filter string) error {
 	if err != nil {
 		return err
 	}
-
+	defer reader.Close()
 	if err := os.MkdirAll(target, 0755); err != nil {
 		return err
 	}
