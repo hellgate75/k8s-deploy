@@ -9,8 +9,9 @@ import (
 )
 
 type EndPointType byte
-const(
-	RepositoryEndpoint	EndPointType = iota + 1
+
+const (
+	RepositoryEndpoint EndPointType = iota + 1
 )
 
 func CreateApiEndpoints(router *mux.Router,
@@ -20,10 +21,11 @@ func CreateApiEndpoints(router *mux.Router,
 	hostBaseUrl string,
 	epType EndPointType,
 	configuration interface{},
-	dataManager model.RepositoryDataManager) error {
+	dataManager model.RepositoryDataManager,
+	repositoryStorageManager model.RepositoryStorageManager) error {
 	switch epType {
 	case RepositoryEndpoint:
-		createV1RegistryApiEndpoints(router, authFunc, dnsHandler, logger, hostBaseUrl, configuration.(model.KubeRepoConfig), dataManager)
+		createV1RegistryApiEndpoints(router, authFunc, dnsHandler, logger, hostBaseUrl, configuration.(model.KubeRepoConfig), dataManager, repositoryStorageManager)
 		return nil
 	default:
 		return errors.New("Not implemented")
@@ -37,8 +39,9 @@ func createV1RegistryApiEndpoints(router *mux.Router,
 	logger log.Logger,
 	hostBaseUrl string,
 	config model.KubeRepoConfig,
-	dataManager model.RepositoryDataManager) {
-	v1RegistryRootRest := NewV1RegistryRootRestService(logger, hostBaseUrl, config, dataManager)
+	dataManager model.RepositoryDataManager,
+	repositoryStorageManager model.RepositoryStorageManager) {
+	v1RegistryRootRest := NewV1RegistryRootRestService(logger, hostBaseUrl, config, dataManager, repositoryStorageManager)
 	router.HandleFunc("/v1/repositories", authFunc(restHandler(v1RegistryRootRest))).Methods("GET", "POST", "PUT", "DELETE")
 	//Adding entry point for groups queries (PUT, POST, DEL, GET)
 	//router.HandleFunc("/v1/dns/groups", authFunc(restHandler(v1GroupsRest))).Methods("GET", "POST", "PUT", "DELETE")

@@ -29,9 +29,9 @@ func getRootRepositoryApiReference(method string) model.ApiReference {
 		"/v1/repositories",
 	})
 	return model.ApiReference{
-		CurrentUrl: "/v1/repositories",
+		CurrentUrl:    "/v1/repositories",
 		CurrentMethod: method,
-		Urls: items,
+		Urls:          items,
 	}
 }
 
@@ -41,10 +41,11 @@ type RestRegistryRootResponse struct {
 
 // RestRegistryRootService is an implementation of RestService interface.
 type RestRegistryRootService struct {
-	Log     log.Logger
-	BaseUrl string
-	Configuration model.KubeRepoConfig
-	DataManager model.RepositoryDataManager
+	Log                      log.Logger
+	BaseUrl                  string
+	Configuration            model.KubeRepoConfig
+	DataManager              model.RepositoryDataManager
+	RepositoryStorageManager model.RepositoryStorageManager
 }
 
 // Create is HTTP handler of POST model.Request.
@@ -52,10 +53,10 @@ type RestRegistryRootService struct {
 func (s *RestRegistryRootService) Create(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	response := model.Response{
-		Status:  http.StatusMethodNotAllowed,
-		Message: "Not allowed on rest root",
+		Status:    http.StatusMethodNotAllowed,
+		Message:   "Not allowed on rest root",
 		Reference: getRootRepositoryApiReference("POST"),
-		Data:    nil,
+		Data:      nil,
 	}
 	err := utils.RestParseResponse(w, r, &response)
 	if err != nil {
@@ -88,7 +89,7 @@ func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-//	groups := s.Store.GetGroupBucket().ListGroups()
+	//	groups := s.Store.GetGroupBucket().ListGroups()
 	var list = make([]string, 0)
 	var message = "OK"
 	resp := s.DataManager.ListRepositories()
@@ -102,14 +103,14 @@ func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 	} else {
 		message = fmt.Sprintf("ERROR:: %s", resp.Message)
 	}
-//	for _, g := range groups {
-//		list = append(list, g.Name)
-//	}
+	//	for _, g := range groups {
+	//		list = append(list, g.Name)
+	//	}
 	response := model.Response{
-		Status:  http.StatusOK,
-		Message: message,
+		Status:    http.StatusOK,
+		Message:   message,
 		Reference: getRootRepositoryApiReference("POST"),
-		Data:    RestRegistryRootResponse{Repositories: list},
+		Data:      RestRegistryRootResponse{Repositories: list},
 	}
 	w.WriteHeader(http.StatusOK)
 	err := utils.RestParseResponse(w, r, &response)

@@ -14,11 +14,15 @@ type RestService interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
-func NewV1RegistryRootRestService(logger log.Logger, hostBaseUrl string, configuration model.KubeRepoConfig, dataManager model.RepositoryDataManager) RestService {
+func NewV1RegistryRootRestService(logger log.Logger, hostBaseUrl string,
+	configuration model.KubeRepoConfig,
+	dataManager model.RepositoryDataManager,
+	repositoryStorageManager model.RepositoryStorageManager) RestService {
 	return &v1.RestRegistryRootService{
-		Log:     logger,
-		BaseUrl: hostBaseUrl,
-		Configuration: configuration,
-		DataManager: dataManager,
+		Log:                      logger,
+		BaseUrl:                  hostBaseUrl,
+		Configuration:            configuration,
+		DataManager:              dataManager,
+		RepositoryStorageManager: repositoryStorageManager,
 	}
 }

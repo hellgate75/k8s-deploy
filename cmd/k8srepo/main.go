@@ -41,10 +41,12 @@ var listenIP string
 var listenPort int
 var tlsCert string
 var tlsKey string
+
 const (
 	LoggerAppName       = "k8s-deploy-repository"
-	ApplicationFullName ="Kubernetes Deploy Repository"
+	ApplicationFullName = "Kubernetes Deploy Repository"
 )
+
 //TODO: Give Life to Logger
 var logger log.Logger = log.NewLogger(LoggerAppName, log.DEBUG)
 
@@ -67,7 +69,7 @@ func init() {
 	flag.StringVar(&tlsKey, "tsl-key", "", "tls certificate key file path")
 	flag.BoolVar(&mongoDbEnabled, "mongo-db-enabled", false, "MongoDb enabled state")
 	flag.StringVar(&mongoDbHost, "mongo-db-host", "127.0.0.1", "MongoDb hostname or public ip")
-	flag.IntVar(&mongoDbPort,"mongo-db-port", 27017, "MongoDb public port")
+	flag.IntVar(&mongoDbPort, "mongo-db-port", 27017, "MongoDb public port")
 	flag.StringVar(&mongoDbUser, "mongo-db-user", "", "MongoDb user name")
 	flag.StringVar(&mongoDbPassword, "mongo-db-password", "", "MongoDb user password")
 	flag.StringVar(&storageNamePrefix, "storage-name-prefix", rest.DefaultDatabaseNamePrefix, "MongoDb database name or device folder prefix")
@@ -206,7 +208,11 @@ func main() {
 	} else {
 		dataManager = data.GetDeviceRepositoryDataManager(rwDirPath)
 	}
-
+	repositoryStorageManager, err := integration.GetRepositoryStorageManagerSingleton(rwDirPath)
+	if err != nil {
+		logger.Fatalf("Unable to instantiate Repository storage manager, Error: %s", err.Error())
+		os.Exit(1)
+	}
 	// Handler stuf for the API service groups
 	apiHandler := func(service services.RestService) http.HandlerFunc {
 		return func(w http.ResponseWriter, r *http.Request) {
@@ -239,7 +245,7 @@ func main() {
 	// Creates/Sets API endpoints handlers
 	err = services.CreateApiEndpoints(rtr, withAuth, apiHandler,
 		logger, fmt.Sprintf("%s://%s:%v", proto, listenIP, listenPort),
-		services.RepositoryEndpoint, config, dataManager)
+		services.RepositoryEndpoint, config, dataManager, repositoryStorageManager)
 	if err != nil {
 		logger.Infof("%s RestService start-up:: Error creating API endpoints: %s\n", ApplicationFullName, err.Error())
 		os.Exit(1)
