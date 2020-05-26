@@ -598,10 +598,6 @@ func (i *Instance) LoadJson(path string) error {
 	return utils.LoadStructureFromJsonFile(path, i)
 }
 
-func (i *Instance) GetValues() []Value {
-	return i.values
-}
-
 type Job struct {
 	ProjectId  string   `yaml:"projectId" json:"projectId" xml:"project-id"`
 	VersionId  string   `yaml:"versionId" json:"versionId" xml:"version-id"`
