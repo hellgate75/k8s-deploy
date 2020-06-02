@@ -2,6 +2,7 @@ package utils
 
 import (
 	"fmt"
+	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"io"
 	"os"
@@ -33,6 +34,15 @@ func CleanCreateFolder(fileOrFolder string) error {
 	return os.MkdirAll(fileOrFolder, 0666)
 }
 
+// Gets a file/folder path extension
+func GetPathExtension(fileOrFolder string) (string, error) {
+	if "" == fileOrFolder || !strings.Contains(fileOrFolder, ".") {
+		return "", errors.New(fmt.Sprintf("Unable to determine extension for file or folder: %s", fileOrFolder))
+	}
+	tkns := strings.Split(fileOrFolder, ".")
+	return tkns[len(tkns)-1], nil
+}
+
 // Delete a folder if it exists
 func DeleteFileOrFolder(fileOrFolder string) error {
 	if st, err := os.Stat(fileOrFolder); err == nil {
@@ -57,13 +67,13 @@ func ExistsFileOrFolder(fileOrFolder string) bool {
 
 // Copy file into a folder and return number of copied bytes, the destination file path and eventually copy operation error
 func CopyFileToFolder(filePath string, folder string) (int64, string, error) {
-	if ! ExistsFileOrFolder(folder) {
+	if !ExistsFileOrFolder(folder) {
 		err := CreateFolder(folder)
 		if err != nil {
 			return 0, "", err
 		}
 	}
-	if ! ExistsFileOrFolder(filePath) {
+	if !ExistsFileOrFolder(filePath) {
 		return 0, "", errors.New(fmt.Sprintf("File %s doesn't exist, cannot copy to folder %s", filePath, folder))
 	}
 	st, _ := os.Stat(filePath)
@@ -147,4 +157,12 @@ func AddToOSPathList(dir string) error {
 		os.Setenv("PATH", path)
 	}
 	return nil
+}
+
+func GetRandPath() string {
+	return uuid.New().String()
+}
+
+func GetTempFolder(folder string) string {
+	return fmt.Sprintf("%s%c%s", os.TempDir(), os.PathSeparator, folder)
 }

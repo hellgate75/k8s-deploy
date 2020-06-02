@@ -5,9 +5,9 @@ import "sync"
 //Describes the Repository Charts Manager interface
 type RepositoryStorageManager interface {
 	// Gets the list of existing repositories
-	GetRepositoriesList() []Repository
+	GetRepositoryList() []Repository
 	//Crete a new named repository, if the name is not in use yet
-	CreateRepository(name string) (Repository, error)
+	CreateRepository(name string) (*Repository, error)
 	// Delete a repository using the name
 	DeleteRepositoryByName(name string) error
 	// Delete a repository using the identifier
@@ -20,8 +20,8 @@ type RepositoryStorageManager interface {
 	ListRepositoryKubeFiles(id string) ([]KubeFile, error)
 	// Backup an existing repository
 	BackupRepository(id string, archiveFile string, useZipFormat bool) error
-	// Restore an existing repository
-	RestoreRepository(id string, archiveFile string, useZipFormat bool, forceCreate bool) error
+	// Restore an existing repository from zip/tar archive
+	RestoreRepository(archiveFile string, useZipFormat bool, forceCreate bool) error
 	// Gets Charts Manager for given repository
 	GetRepositoryChartsManager(id string) (RepositoryChartManager, error)
 	// Gets Kubernetes yaml files Manager for given repository
@@ -34,6 +34,10 @@ type RepositoryStorageManager interface {
 	Refresh() error
 	// Saves current repository stage
 	SavePoint() error
+	// Get a single repository by name
+	GetRepository(name string) (*Repository, error)
+	// Get a single repository by id
+	GetRepositoryById(id string) (*Repository, error)
 }
 
 //Describes the Repository Charts Manager interface

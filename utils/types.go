@@ -75,3 +75,7 @@ func NewUID() string {
 func ConvertKeyToId(key string) string {
 	return strings.ToLower(strings.ReplaceAll(strings.ReplaceAll(key, ".", "-"), " ", "-"))
 }
+
+func ConvertName(name string) string {
+	return strings.ToLower(strings.ReplaceAll(strings.TrimSpace(name), " ", "-"))
+}

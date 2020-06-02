@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
@@ -24,8 +25,10 @@ func ZipCompress(source, target string) error {
 	}
 
 	var baseDir string
+	var fullBaseDir string
 	if info.IsDir() {
 		baseDir = filepath.Base(source)
+		fullBaseDir = source
 	}
 
 	filepath.Walk(source, func(path string, info os.FileInfo, err error) error {
@@ -39,13 +42,28 @@ func ZipCompress(source, target string) error {
 		}
 
 		if baseDir != "" {
-			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, source))
+			var baseDirPath = fullBaseDir
+			if runtime.GOOS == "windows" && strings.Contains(baseDirPath, "/") {
+				baseDirPath = strings.ReplaceAll(baseDirPath, "/", "\\")
+			}
+			if runtime.GOOS == "windows" && strings.Contains(path, "/") {
+				path = strings.ReplaceAll(path, "/", "\\")
+			}
+			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, baseDirPath))
+			if header.Name == baseDirPath {
+				header.Name = ""
+			}
 		}
-
 		if info.IsDir() {
-			header.Name += "/"
+			if header.Name != "" {
+				header.Name += "/"
+			}
 		} else {
 			header.Method = zip.Deflate
+		}
+
+		if header.Name == "" {
+			return nil
 		}
 
 		writer, err := archive.CreateHeader(header)
@@ -119,7 +137,7 @@ func ZipUnCompressFilter(archive, target string, filter string) error {
 	for _, file := range reader.File {
 		path := filepath.Join(target, file.Name)
 		if file.FileInfo().IsDir() {
-			if (strings.Contains(file.Name, filter)) {
+			if strings.Contains(file.Name, filter) {
 				os.MkdirAll(path, file.Mode())
 			}
 			continue
@@ -130,7 +148,7 @@ func ZipUnCompressFilter(archive, target string, filter string) error {
 			return err
 		}
 		defer fileReader.Close()
-		if  strings.Contains(path, filter) {
+		if strings.Contains(path, filter) {
 			_, name := filepath.Split(file.Name)
 			path = filepath.Join(target, name)
 			targetFile, err := os.OpenFile(path, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, file.Mode())

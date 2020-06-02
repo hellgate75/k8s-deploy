@@ -7,10 +7,11 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 )
 
-func addFileToTar(tw * tar.Writer, path string) error {
+func addFileToTar(tw *tar.Writer, path string) error {
 	file, err := os.Open(path)
 	if err != nil {
 		return err
@@ -35,7 +36,6 @@ func addFileToTar(tw * tar.Writer, path string) error {
 	return nil
 }
 
-
 func TarCompress(source, target string, compress bool) error {
 	tarfile, err := os.Create(target)
 	if err != nil {
@@ -45,11 +45,16 @@ func TarCompress(source, target string, compress bool) error {
 	var tw *tar.Writer
 	if compress {
 		gw := gzip.NewWriter(tarfile)
-		defer gw.Close()
 		tw = tar.NewWriter(gw)
-		defer tw.Close()
+		defer func() {
+			tw.Close()
+			gw.Close()
+		}()
 	} else {
 		tw = tar.NewWriter(tarfile)
+		defer func() {
+			tw.Close()
+		}()
 	}
 	info, err := os.Stat(source)
 	if err != nil {
@@ -57,12 +62,13 @@ func TarCompress(source, target string, compress bool) error {
 	}
 
 	var baseDir string
+	var fullBaseDir string
 	if info.IsDir() {
 		baseDir = filepath.Base(source)
-	} else {
+		fullBaseDir = source
 	}
 
-	err = filepath.Walk(baseDir, func(file string, fi os.FileInfo, err error) error {
+	err = filepath.Walk(source, func(path string, fi os.FileInfo, err error) error {
 		// return on any error
 		if err != nil {
 			return err
@@ -73,32 +79,48 @@ func TarCompress(source, target string, compress bool) error {
 			return nil
 		}
 
-		// create a new dir/file header
+		// create a new dir/path header
 		header, err := tar.FileInfoHeader(fi, fi.Name())
 		if err != nil {
 			return err
 		}
 
+		if baseDir != "" {
+			var baseDirPath = fullBaseDir
+			if runtime.GOOS == "windows" && strings.Contains(baseDirPath, "/") {
+				baseDirPath = strings.ReplaceAll(baseDirPath, "/", "\\")
+			}
+			if runtime.GOOS == "windows" && strings.Contains(path, "/") {
+				path = strings.ReplaceAll(path, "/", "\\")
+			}
+			header.Name = filepath.Join(baseDir, strings.TrimPrefix(path, baseDirPath))
+			if header.Name == baseDirPath {
+				header.Name = ""
+			}
+			header.Name = filepath.ToSlash(header.Name)
+		}
 		// update the name to correctly reflect the desired destination when untaring
-		header.Name = strings.TrimPrefix(strings.Replace(file, source, "", -1), string(filepath.Separator))
-
+		//header.Name = strings.TrimPrefix(strings.Replace(path, source, "", -1), string(filepath.Separator))
+		if fi.IsDir() {
+			return nil
+		}
 		// write the header
 		if err := tw.WriteHeader(header); err != nil {
 			return err
 		}
 
 		// open files for taring
-		f, err := os.Open(file)
+		f, err := os.Open(path)
 		if err != nil {
 			return err
 		}
 
-		// copy file data into tar writer
+		// copy path data into tar writer
 		if _, err := io.Copy(tw, f); err != nil {
 			return err
 		}
 
-		// manually close here after each file operation; defering would cause each file close
+		// manually close here after each path operation; defering would cause each path close
 		// to wait until all operations have completed.
 		f.Close()
 
@@ -129,7 +151,7 @@ func TarUnCompress(archive, target string, uncompress bool) error {
 		return err
 	}
 	header, err := tr.Next()
-	for header !=nil && err == nil {
+	for header != nil && err == nil {
 		path := filepath.Join(target, header.Name)
 		if header.FileInfo().IsDir() {
 			var mode = os.FileMode(header.Mode)
@@ -175,11 +197,11 @@ func TarUnCompressFilter(archive, target string, uncompress bool, filter string)
 		return err
 	}
 	header, err := tr.Next()
-	for header !=nil && err == nil {
-		if  strings.Contains(header.Name, filter) {
+	for header != nil && err == nil {
+		if strings.Contains(header.Name, filter) {
 			path := filepath.Join(target, header.Name)
 			if header.FileInfo().IsDir() {
-				if (strings.Contains(header.Name, filter)) {
+				if strings.Contains(header.Name, filter) {
 					var mode = os.FileMode(header.Mode)
 					_ = os.MkdirAll(path, mode)
 				}
