@@ -190,6 +190,11 @@ func main() {
 		return
 	}
 
+	repositoryStorageManager, err := integration.GetRepositoryStorageManagerSingleton(rwDirPath, logger)
+	if err != nil {
+		logger.Fatalf("Unable to instantiate Repository storage manager, Error: %s", err.Error())
+		os.Exit(1)
+	}
 	// Create Data Store
 	var dataManager model.RepositoryDataManager
 	// Read from remote db or local folder
@@ -204,14 +209,9 @@ func main() {
 			logger.Fatalf("%s is unable to connect to mongo db, reason: %s", ApplicationFullName, err.Error())
 			os.Exit(1)
 		}
-		dataManager = data.GetMongoRepositoryDataManager(conn)
+		dataManager = data.GetMongoRepositoryDataManager(conn, rwDirPath, repositoryStorageManager, logger)
 	} else {
-		dataManager = data.GetDeviceRepositoryDataManager(rwDirPath)
-	}
-	repositoryStorageManager, err := integration.GetRepositoryStorageManagerSingleton(rwDirPath)
-	if err != nil {
-		logger.Fatalf("Unable to instantiate Repository storage manager, Error: %s", err.Error())
-		os.Exit(1)
+		dataManager = data.GetDeviceRepositoryDataManager(rwDirPath, repositoryStorageManager, logger)
 	}
 	// Handler stuf for the API service groups
 	apiHandler := func(service services.RestService) http.HandlerFunc {

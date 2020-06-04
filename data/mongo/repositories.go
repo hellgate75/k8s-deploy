@@ -3,6 +3,7 @@ package mongo
 import (
 	"fmt"
 	"github.com/hellgate75/go-services/database"
+	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 	"os"
 )
@@ -12,45 +13,48 @@ func getRepositoryFolder(basePath string, repoName string) string {
 }
 
 type repositoryManager struct {
-	conn	database.Connection
+	conn       database.Connection
+	manager    model.RepositoryStorageManager
+	logger     log.Logger
+	baseFolder string
 }
 
-func (rn *repositoryManager) ListRepositories()  model.DataResponse {
+func (rn *repositoryManager) ListRepositories() model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) AddRepository(r model.Repository)  model.DataResponse {
+func (rn *repositoryManager) AddRepository(n string) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) DeleteRepositories(q ... model.Query)  model.DataResponse {
+func (rn *repositoryManager) DeleteRepositories(q ...model.Query) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) PurgeRepositories(q ... model.Query)  model.DataResponse {
+func (rn *repositoryManager) PurgeRepositories(q ...model.Query) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) ClearRepository(id string)  model.DataResponse {
+func (rn *repositoryManager) ClearRepository(id string) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) ClearRepositoryByName(name string)  model.DataResponse {
+func (rn *repositoryManager) ClearRepositoryByName(name string) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
@@ -70,18 +74,25 @@ func (rn *repositoryManager) AccessRepository(r model.Repository) *model.Documen
 	return &dm
 }
 
-
-func (rn *repositoryManager) OverrideRepository(id string, r model.Repository)  model.DataResponse {
+func (rn *repositoryManager) UpdateRepository(id string, r *model.Repository) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-
-func GetRepositoryDataManager(conn database.Connection) model.RepositoryDataManager {
-	return &repositoryManager {
-		conn: conn,
+func (rn *repositoryManager) OverrideRepository(id string, r *model.Repository) model.DataResponse {
+	return model.DataResponse{
+		Success: false,
+		Message: "Not Implemented",
 	}
 }
 
+func GetRepositoryDataManager(conn database.Connection, baseFolder string, manager model.RepositoryStorageManager, logger log.Logger) model.RepositoryDataManager {
+	return &repositoryManager{
+		conn:       conn,
+		manager:    manager,
+		logger:     logger,
+		baseFolder: baseFolder,
+	}
+}

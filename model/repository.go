@@ -1,13 +1,15 @@
 package model
 
-import "sync"
-
 //Describes the Repository Charts Manager interface
 type RepositoryStorageManager interface {
 	// Gets the list of existing repositories
 	GetRepositoryList() []Repository
 	//Crete a new named repository, if the name is not in use yet
 	CreateRepository(name string) (*Repository, error)
+	//Update an existing repository or create a new named one, if the id is reflects to an existing reporisotry
+	UpdateRepository(id string, r Repository) (*Repository, error)
+	//Override an existing repository or create a new named one, if the id is reflects to an existing reporisotry
+	OverrideRepository(id string, r Repository) (*Repository, error)
 	// Delete a repository using the name
 	DeleteRepositoryByName(name string) error
 	// Delete a repository using the identifier
@@ -17,7 +19,7 @@ type RepositoryStorageManager interface {
 	// List all repository charts
 	ListRepositoryCharts(id string) ([]Chart, error)
 	// List all repository Kubernetes yaml files
-	ListRepositoryKubeFiles(id string) ([]KubeFile, error)
+	ListRepositoryKubeFiles(id string) ([]KubernetesFile, error)
 	// Backup an existing repository
 	BackupRepository(id string, archiveFile string, useZipFormat bool) error
 	// Restore an existing repository from zip/tar archive
@@ -26,8 +28,10 @@ type RepositoryStorageManager interface {
 	GetRepositoryChartsManager(id string) (RepositoryChartManager, error)
 	// Gets Kubernetes yaml files Manager for given repository
 	GetRepositoryKubeFilesManager(id string) (RepositoryKubeFilesManager, error)
-	// Gets given repository mutex
-	GetRepositoryMutex(id string) (sync.RWMutex, error)
+	// Gets Charts Manager for given repository
+	GetRepositoryChartsManagerByName(id string) (RepositoryChartManager, error)
+	// Gets Kubernetes yaml files Manager for given repository
+	GetRepositoryKubeFilesManagerByName(id string) (RepositoryKubeFilesManager, error)
 	// Initializes and loads all repositories
 	Initialize() (RepositoryStorageManager, error)
 	// Reloads all repositories information from storage

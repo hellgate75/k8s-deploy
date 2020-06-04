@@ -1,11 +1,20 @@
 package integration
 
-import "github.com/hellgate75/k8s-deploy/model"
+import (
+	"github.com/hellgate75/k8s-deploy/log"
+	"github.com/hellgate75/k8s-deploy/model"
+)
 
 type chartsRepositoryManager struct {
 	repository model.Repository
 	dataFolder string
+	logger     log.Logger
 }
+
+const (
+	repositoryChartsIndexTemplate  = "%s%crepositories%c%s%ccharts%cindex.%v"
+	repositoryChartsFolderTemplate = "%s%crepositories%c%s%ccharts"
+)
 
 func (c *chartsRepositoryManager) VerifyChart(name string, version string) error {
 	panic("implement me")
@@ -59,9 +68,10 @@ func (c *chartsRepositoryManager) UndeployInstalledChart(name string) (model.Ver
 	panic("implement me")
 }
 
-func NewRepositoryChartManager(repository model.Repository, dataFolder string) model.RepositoryChartManager {
+func NewRepositoryChartManager(repository model.Repository, dataFolder string, logger log.Logger) model.RepositoryChartManager {
 	return &chartsRepositoryManager{
 		repository: repository,
 		dataFolder: dataFolder,
+		logger:     logger,
 	}
 }

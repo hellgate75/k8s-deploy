@@ -1,13 +1,20 @@
 package integration
 
 import (
+	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 )
 
 type kubefileRepositoryManager struct {
 	repository model.Repository
 	dataFolder string
+	logger     log.Logger
 }
+
+const (
+	repositoryKubefilesIndexTemplate  = "%s%crepositories%c%s%ckubefiles%cindex.%v"
+	repositoryKubefilesFolderTemplate = "%s%crepositories%c%s%ckubefiles"
+)
 
 func (k *kubefileRepositoryManager) VerifyKubeFile(name string, version string) error {
 	panic("implement me")
@@ -61,9 +68,10 @@ func (k *kubefileRepositoryManager) UndeployInstalledKubeFile(name string) (mode
 	panic("implement me")
 }
 
-func NewRepositoryKubeFilesManager(repository model.Repository, dataFolder string) model.RepositoryKubeFilesManager {
+func NewRepositoryKubeFilesManager(repository model.Repository, dataFolder string, logger log.Logger) model.RepositoryKubeFilesManager {
 	return &kubefileRepositoryManager{
 		repository: repository,
 		dataFolder: dataFolder,
+		logger:     logger,
 	}
 }

@@ -39,6 +39,11 @@ type RestRegistryRootResponse struct {
 	Repositories []string `yaml:"repositories,omitempty" json:"repositories,omitempty" xml:"k8srepo,omitempty"`
 }
 
+type RestRegistryRootRequest struct {
+	Name string `yaml:"name,omitempty" json:"name,omitempty" xml:"name,omitempty"`
+	Id   string `yaml:"id,omitempty" json:"id,omitempty" xml:"id,omitempty"`
+}
+
 // RestRegistryRootService is an implementation of RestService interface.
 type RestRegistryRootService struct {
 	Log                      log.Logger
@@ -51,14 +56,49 @@ type RestRegistryRootService struct {
 // Create is HTTP handler of POST model.Request.
 // Use for adding new record to DNS server.
 func (s *RestRegistryRootService) Create(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	response := model.Response{
-		Status:    http.StatusMethodNotAllowed,
-		Message:   "Not allowed on rest root",
-		Reference: getRootRepositoryApiReference("POST"),
-		Data:      nil,
+	s.Log.Infof("RestRegistryRootService.Create() - Path: %s ...", r.URL.Path)
+	var request = RestRegistryRootRequest{}
+	var response model.Response
+	err := utils.RestParseRequest(w, r, &request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response = model.Response{
+			Status:    http.StatusBadRequest,
+			Message:   fmt.Sprintf("Error parsing request: %v", err),
+			Reference: getRootRepositoryApiReference("POST"),
+			Data:      nil,
+		}
+	} else {
+		if request.Name == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			response = model.Response{
+				Status:    http.StatusBadRequest,
+				Message:   "Name field must be valid and not empty",
+				Reference: getRootRepositoryApiReference("POST"),
+				Data:      nil,
+			}
+		} else {
+			var resp = s.DataManager.AddRepository(request.Name)
+			if resp.Success {
+				w.WriteHeader(http.StatusOK)
+				response = model.Response{
+					Status:    http.StatusOK,
+					Message:   resp.Message,
+					Reference: getRootRepositoryApiReference("POST"),
+					Data:      resp.ResponseObjects[0],
+				}
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+				response = model.Response{
+					Status:    http.StatusInternalServerError,
+					Message:   fmt.Sprintf("Error creating repository: %s, message: %s", request.Name, resp.Message),
+					Reference: getRootRepositoryApiReference("POST"),
+					Data:      nil,
+				}
+			}
+		}
 	}
-	err := utils.RestParseResponse(w, r, &response)
+	err = utils.RestParseResponse(w, r, &response)
 	if err != nil {
 		s.Log.Errorf("Error encoding response: %v", err)
 	}
@@ -67,6 +107,7 @@ func (s *RestRegistryRootService) Create(w http.ResponseWriter, r *http.Request)
 // Read is HTTP handler of GET model.Request.
 // Use for reading existed records on DNS server.
 func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
+	s.Log.Infof("RestRegistryRootService.Read() - Path: %s ...", r.URL.Path)
 	var action = r.URL.Query().Get("action")
 	var method = r.URL.Query().Get("method")
 	if strings.ToLower(action) == "template" {
@@ -109,7 +150,7 @@ func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 	response := model.Response{
 		Status:    http.StatusOK,
 		Message:   message,
-		Reference: getRootRepositoryApiReference("POST"),
+		Reference: getRootRepositoryApiReference("GET"),
 		Data:      RestRegistryRootResponse{Repositories: list},
 	}
 	w.WriteHeader(http.StatusOK)
@@ -123,13 +164,50 @@ func (s *RestRegistryRootService) Read(w http.ResponseWriter, r *http.Request) {
 // Update is HTTP handler of PUT model.Request.
 // Use for updating existed records on DNS server.
 func (s *RestRegistryRootService) Update(w http.ResponseWriter, r *http.Request) {
-	w.WriteHeader(http.StatusMethodNotAllowed)
-	response := model.Response{
-		Status:  http.StatusMethodNotAllowed,
-		Message: "Not allowed on rest root",
-		Data:    nil,
+	s.Log.Infof("RestRegistryRootService.Update() - Path: %s ...", r.URL.Path)
+	var request = RestRegistryRootRequest{}
+	var response model.Response
+	err := utils.RestParseRequest(w, r, &request)
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		response = model.Response{
+			Status:    http.StatusBadRequest,
+			Message:   fmt.Sprintf("Error parsing request: %v", err),
+			Reference: getRootRepositoryApiReference("POST"),
+			Data:      nil,
+		}
+	} else {
+		if request.Name == "" || request.Id == "" {
+			w.WriteHeader(http.StatusBadRequest)
+			response = model.Response{
+				Status:    http.StatusBadRequest,
+				Message:   "Name and Id field must be valid and not empty",
+				Reference: getRootRepositoryApiReference("POST"),
+				Data:      nil,
+			}
+		} else {
+
+			var resp = s.DataManager.AddRepository(request.Name)
+			if resp.Success {
+				w.WriteHeader(http.StatusOK)
+				response = model.Response{
+					Status:    http.StatusOK,
+					Message:   resp.Message,
+					Reference: getRootRepositoryApiReference("POST"),
+					Data:      resp.ResponseObjects[0],
+				}
+			} else {
+				w.WriteHeader(http.StatusInternalServerError)
+				response = model.Response{
+					Status:    http.StatusInternalServerError,
+					Message:   fmt.Sprintf("Error creating repository: %s, message: %s", request.Name, resp.Message),
+					Reference: getRootRepositoryApiReference("POST"),
+					Data:      nil,
+				}
+			}
+		}
 	}
-	err := utils.RestParseResponse(w, r, &response)
+	err = utils.RestParseResponse(w, r, &response)
 	if err != nil {
 		s.Log.Errorf("Error encoding response: %v", err)
 	}
@@ -138,6 +216,7 @@ func (s *RestRegistryRootService) Update(w http.ResponseWriter, r *http.Request)
 // Delete is HTTP handler of DELETE model.Request.
 // Use for removing records on DNS server.
 func (s *RestRegistryRootService) Delete(w http.ResponseWriter, r *http.Request) {
+	s.Log.Infof("RestRegistryRootService.Delete() - Path: %s ...", r.URL.Path)
 	w.WriteHeader(http.StatusMethodNotAllowed)
 	response := model.Response{
 		Status:  http.StatusMethodNotAllowed,

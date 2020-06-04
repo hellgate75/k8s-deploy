@@ -225,14 +225,14 @@ func (ch *Chart) LoadJson(path string) error {
 	return utils.LoadStructureFromJsonFile(path, ch)
 }
 
-type KubeFile struct {
+type KubernetesFile struct {
 	Id       string    `yaml:"id" json:"id" xml:"id"`
 	Name     string    `yaml:"name" json:"name" xml:"name"`
 	Versions []Version `yaml:"versions" json:"versions" xml:"version"`
 	State    State     `yaml:"state" json:"state" xml:"state"`
 }
 
-func (kf *KubeFile) ToJson() (string, error) {
+func (kf *KubernetesFile) ToJson() (string, error) {
 	d, err := utils.StructureToJson(kf)
 	if err != nil {
 		return "", err
@@ -240,7 +240,7 @@ func (kf *KubeFile) ToJson() (string, error) {
 	return string(d), nil
 }
 
-func (kf *KubeFile) String() string {
+func (kf *KubernetesFile) String() string {
 	s, err := kf.ToJson()
 	if err != nil {
 		return fmt.Sprintf("<error:%s>", err.Error())
@@ -248,20 +248,68 @@ func (kf *KubeFile) String() string {
 	return s
 }
 
-func (kf *KubeFile) FromJson(d string) error {
+func (kf *KubernetesFile) FromJson(d string) error {
 	return utils.JsonToStructure(d, kf)
 }
 
-func (kf *KubeFile) LoadJson(path string) error {
+func (kf *KubernetesFile) LoadJson(path string) error {
 	return utils.LoadStructureFromJsonFile(path, kf)
 }
 
+func CreateRepository(id string, name string, state State) Repository {
+	return Repository{
+		Id:        id,
+		Name:      name,
+		State:     state,
+		charts:    make([]Chart, 0),
+		kubeFiles: make([]KubernetesFile, 0),
+	}
+}
+
 type Repository struct {
-	Id        string     `yaml:"id" json:"id" xml:"id"`
-	Name      string     `yaml:"name" json:"name" xml:"name"`
-	Charts    []Chart    `yaml:"charts" json:"charts" xml:"chart"`
-	KubeFiles []KubeFile `yaml:"kubefiles" json:"kubefiles" xml:"kubefile"`
-	State     State      `yaml:"state" json:"state" xml:"state"`
+	Id        string `yaml:"id" json:"id" xml:"id"`
+	Name      string `yaml:"name" json:"name" xml:"name"`
+	charts    []Chart
+	kubeFiles []KubernetesFile
+	State     State `yaml:"state" json:"state" xml:"state"`
+}
+
+func (r *Repository) GetCharts() []Chart {
+	return r.charts
+}
+
+func (r *Repository) ReplaceCharts(c ...Chart) {
+	r.charts = c
+}
+
+func (r *Repository) AddCharts(c ...Chart) {
+	r.charts = append(r.charts, c...)
+}
+
+func (r *Repository) GetChartList() ChartList {
+	return ChartList{
+		RepoName: r.Name,
+		Charts:   r.charts,
+	}
+}
+
+func (r *Repository) GetKubernetesFiles() []KubernetesFile {
+	return r.kubeFiles
+}
+
+func (r *Repository) ReplaceKubernetesFiles(f ...KubernetesFile) {
+	r.kubeFiles = f
+}
+
+func (r *Repository) AddKubernetesFiles(f ...KubernetesFile) {
+	r.kubeFiles = append(r.kubeFiles, f...)
+}
+
+func (r *Repository) GetKubernetesFileList() KubeFileList {
+	return KubeFileList{
+		RepoName: r.Name,
+		Files:    r.kubeFiles,
+	}
 }
 
 func (r *Repository) ToJson() (string, error) {

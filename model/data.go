@@ -3,13 +3,13 @@ package model
 // Represents the data interaction response structure
 type DataResponse struct {
 	// Success state flag
-	Success			bool
+	Success bool
 	// Error message
-	Message			string
+	Message string
 	// Number of changes in the data operation
-	Changes			int64
+	Changes int64
 	// Created, Modified or Deleted objects
-	ResponseObjects	[]interface{}
+	ResponseObjects []interface{}
 }
 
 // Represents the k8srepo documents data storage manager
@@ -17,11 +17,11 @@ type DocumentsDataManager interface {
 	// Add new chart data
 	AddChart(c Chart) DataResponse
 	// Add new Kubefile data
-	AddKubeFile(f KubeFile) DataResponse
+	AddKubeFile(f KubernetesFile) DataResponse
 	// Add new chart version data
 	AddChartVersion(c Chart, v Version) DataResponse
 	// Add new Kubefile version data
-	AddKubeFileVersion(f KubeFile, v Version) DataResponse
+	AddKubeFileVersion(f KubernetesFile, v Version) DataResponse
 	// Remove one or more Charts
 	RemoveCharts(q ...Query) DataResponse
 	// Remove one or more Kube-files
@@ -29,7 +29,7 @@ type DocumentsDataManager interface {
 	// Remove one or more Chart versions
 	RemoveChartVersions(c Chart, q ...Query) DataResponse
 	// Remove one or more Kube-file versions
-	RemoveKubeFileVersions(f KubeFile, q ...Query) DataResponse
+	RemoveKubeFileVersions(f KubernetesFile, q ...Query) DataResponse
 	// Purge permanently one or more Charts
 	PurgeCharts(q ...Query) DataResponse
 	// Purge permanently one or more Kube-files
@@ -37,15 +37,15 @@ type DocumentsDataManager interface {
 	// Purge permanently one or more Chart versions
 	PurgeChartVersions(c Chart, q ...Query) DataResponse
 	// Purge permanently one or more Kube-file versions
-	PurgeKubeFileVersions(f KubeFile, q ...Query) DataResponse
+	PurgeKubeFileVersions(f KubernetesFile, q ...Query) DataResponse
 	// Update an existing Charts
 	UpdateCharts(c Chart, q ...Query) DataResponse
 	// Update one or more Kube-files
-	UpdateKubeFiles(f KubeFile, v Version, q ...Query) DataResponse
+	UpdateKubeFiles(f KubernetesFile, v Version, q ...Query) DataResponse
 	// Update an existing Chart versions
 	UpdateChartVersions(c Chart, v Version, q ...Query) DataResponse
 	// Update one or more Kube-file versions
-	UpdateKubeFileVersions(f KubeFile, v Version, q ...Query) DataResponse
+	UpdateKubeFileVersions(f KubernetesFile, v Version, q ...Query) DataResponse
 	// Query over k8srepo Charts
 	QueryCharts(q ...Query) DataResponse
 	// Query over k8srepo Kube-files
@@ -53,7 +53,7 @@ type DocumentsDataManager interface {
 	// Query over k8srepo Chart versions
 	QueryChartVersions(c Chart, q ...Query) DataResponse
 	// Query over k8srepo Kube-file versions
-	QueryKubeFileVersions(f KubeFile, q ...Query) DataResponse
+	QueryKubeFileVersions(f KubernetesFile, q ...Query) DataResponse
 	// List all k8srepo Charts
 	ListCharts() DataResponse
 	// List all k8srepo Kube-files
@@ -69,7 +69,9 @@ type RepositoryDataManager interface {
 	//List all repositories
 	ListRepositories() DataResponse
 	//Add new k8srepo
-	AddRepository(r Repository) DataResponse
+	AddRepository(n string) DataResponse
+	//Add new k8srepo
+	UpdateRepository(id string, r *Repository) DataResponse
 	//Delete one or more repositories
 	DeleteRepositories(q ...Query) DataResponse
 	//Purge data for one or more repositories
@@ -85,7 +87,7 @@ type RepositoryDataManager interface {
 	//Access Repository data via model.DocumentsDataManager
 	AccessRepository(r Repository) *DocumentsDataManager
 	//Override a k8srepo selecting via id
-	OverrideRepository(id string, r Repository) DataResponse
+	OverrideRepository(id string, r *Repository) DataResponse
 }
 
 // Represents the projects data storage manager
@@ -123,7 +125,6 @@ type ProjectDataManager interface {
 	// Query over Project versions
 	QueryProjectVersions(c Chart, q ...Query) DataResponse
 }
-
 
 // Represents the deploy jobs data storage manager
 type JobsDataManager interface {
@@ -170,9 +171,9 @@ type DeployDataManager interface {
 // Represents the global data storage manager
 type DataManager struct {
 	// Manage Repositories Data
-	Repos 		RepositoryDataManager
+	Repos RepositoryDataManager
 	// Manage Projects Data
-	Projects	ProjectDataManager
+	Projects ProjectDataManager
 	// Manage Deploys Data
-	Deploys		DeployDataManager
+	Deploys DeployDataManager
 }

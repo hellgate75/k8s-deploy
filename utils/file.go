@@ -5,6 +5,7 @@ import (
 	"github.com/google/uuid"
 	"github.com/pkg/errors"
 	"io"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -79,21 +80,67 @@ func CopyFileToFolder(filePath string, folder string) (int64, string, error) {
 	st, _ := os.Stat(filePath)
 	_, fileName := filepath.Split(filePath)
 	var dstFilePath = filepath.Join(folder, fileName)
-	if ExistsFileOrFolder(dstFilePath) {
-
+	if st.IsDir() {
+		if !ExistsFileOrFolder(dstFilePath) {
+			err := os.MkdirAll(dstFilePath, 0666)
+			if err != nil {
+				return 0, dstFilePath, err
+			}
+		}
+		files, err := ioutil.ReadDir(filePath)
+		if err != nil {
+			return 0, dstFilePath, err
+		}
+		//fmt.Println("----------------------------")
+		//fmt.Println("list file path ...")
+		//fmt.Printf("filePath: %s\n", filePath)
+		//fmt.Printf("no files: %v\n", len(files))
+		//fmt.Println("----------------------------")
+		//fmt.Println()
+		//fmt.Println()
+		var n int64 = 0
+		for _, f := range files {
+			var srcFileFullPath = filepath.Join(filePath, f.Name())
+			//fmt.Println("----------------------------")
+			//fmt.Println("From Folder file list copy ...")
+			//fmt.Printf("filePath: %s\n", filePath)
+			//fmt.Printf("dstFilePath: %s\n", dstFilePath)
+			//fmt.Printf("dstFileFullPath: %s\n", dstFilePath)
+			//fmt.Printf("srcFileFullPath: %s\n", srcFileFullPath)
+			//fmt.Println("----------------------------")
+			//fmt.Println()
+			var c int64
+			c, _, err = CopyFileToFolder(srcFileFullPath, dstFilePath)
+			if fsf, fserr := os.Stat(srcFileFullPath); fserr == nil && fsf.IsDir() {
+				n += c
+			} else {
+				n += 1
+			}
+			if err != nil {
+				return n, dstFilePath, err
+			}
+		}
+		return n, dstFilePath, nil
+	} else {
+		//fmt.Println("----------------------------")
+		//fmt.Println("From single file copy ...")
+		//fmt.Printf("filePath: %s\n", filePath)
+		//fmt.Printf("dstFilePath: %s\n", dstFilePath)
+		//fmt.Println("----------------------------")
+		//fmt.Println()
+		dstFile, err := os.Create(dstFilePath)
+		if err != nil {
+			return 0, dstFilePath, err
+		}
+		defer dstFile.Close()
+		srcFile, err := os.Open(filePath)
+		if err != nil {
+			return 0, dstFilePath, err
+		}
+		defer srcFile.Close()
+		n, err := io.CopyN(dstFile, srcFile, st.Size())
+		return n, dstFilePath, err
 	}
-	dstFile, err := os.Create(dstFilePath)
-	if err != nil {
-		return 0, "", err
-	}
-	defer dstFile.Close()
-	srcFile, err := os.Open(filePath)
-	if err != nil {
-		return 0, "", err
-	}
-	defer srcFile.Close()
-	n, err := io.CopyN(dstFile, srcFile, st.Size())
-	return n, dstFilePath, err
 }
 
 // Move file into a folder and return number of moved file bytes, the destination file path and eventually move operation error
