@@ -9,6 +9,7 @@ import (
 	"strings"
 )
 
+// Compress a file or folder with ZIP format
 func ZipCompress(source, target string) error {
 	zipfile, err := os.Create(target)
 	if err != nil {
@@ -87,6 +88,7 @@ func ZipCompress(source, target string) error {
 	return err
 }
 
+// Uncompress zip archive to a given folder
 func ZipUnCompress(archive, target string) error {
 	reader, err := zip.OpenReader(archive)
 	if err != nil {
@@ -124,6 +126,7 @@ func ZipUnCompress(archive, target string) error {
 	return nil
 }
 
+// UnCompress zip archive to a given folder, filtering the file/folder name and place in the output folder, without neasted folders
 func ZipUnCompressFilter(archive, target string, filter string) error {
 	reader, err := zip.OpenReader(archive)
 	if err != nil {

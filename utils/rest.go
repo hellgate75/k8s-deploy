@@ -12,6 +12,7 @@ import (
 	"strings"
 )
 
+// Loada a given Rest Service request to a given structure, // Save a given structure to a given Rest Service response, acconding to the request Content-Type Cookies entry
 func RestParseRequest(w http.ResponseWriter, r *http.Request, res interface{}) error {
 	val := r.Header.Get("Content-Type")
 	if val == "" {
@@ -42,10 +43,11 @@ func RestParseRequest(w http.ResponseWriter, r *http.Request, res interface{}) e
 	return nil
 }
 
+// Save a given structure to a given Rest Service response, acconding to the response Accept Cookies entry
 func RestParseResponse(w http.ResponseWriter, r *http.Request, req interface{}) error {
-	val := r.Header.Get("Accepts")
+	val := r.Header.Get("Accept")
 	if val == "" {
-		val = r.Header.Get("accepts")
+		val = r.Header.Get("accept")
 	}
 	prettify := r.Header.Get("Prettify")
 	if prettify == "" {

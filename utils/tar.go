@@ -36,6 +36,7 @@ func addFileToTar(tw *tar.Writer, path string) error {
 	return nil
 }
 
+// Compress a file or folder with tar format, and evenually compress with g-zip encoding
 func TarCompress(source, target string, compress bool) error {
 	tarfile, err := os.Create(target)
 	if err != nil {
@@ -129,6 +130,7 @@ func TarCompress(source, target string, compress bool) error {
 	return err
 }
 
+// UnCompress tar archive to a given folder, evenually compressed with g-zip encoding
 func TarUnCompress(archive, target string, uncompress bool) error {
 	reader, err := os.Open(archive)
 	if err != nil {
@@ -175,6 +177,7 @@ func TarUnCompress(archive, target string, uncompress bool) error {
 	return nil
 }
 
+// UnCompress tar archive to a given folder, evenually compressed with g-zip encoding, filtering the file/folder name and place in the output folder, without neasted folders
 func TarUnCompressFilter(archive, target string, uncompress bool, filter string) error {
 	reader, err := os.Open(archive)
 	if err != nil {

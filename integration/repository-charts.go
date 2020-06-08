@@ -12,8 +12,11 @@ type chartsRepositoryManager struct {
 }
 
 const (
-	repositoryChartsIndexTemplate  = "%s%crepositories%c%s%ccharts%cindex.%v"
-	repositoryChartsFolderTemplate = "%s%crepositories%c%s%ccharts"
+	repositoryChartsIndexTemplate                = "%s%crepositories%c%s%ccharts%cindex.%v"
+	repositoryChartsFolderTemplate               = "%s%crepositories%c%s%ccharts"
+	repositoryChartDetailsIndexTemplate          = "%s%crepositories%c%s%ccharts%c%s%cindex.%v"
+	repositoryChartDetailsFolderTemplate         = "%s%crepositories%c%s%ccharts%c%s"
+	repositoryChartVersionsDetailsFolderTemplate = "%s%crepositories%c%s%ccharts%c%s%c%s"
 )
 
 func (c *chartsRepositoryManager) VerifyChart(name string, version string) error {

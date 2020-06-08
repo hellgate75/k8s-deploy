@@ -178,6 +178,7 @@ func GetUserHomeDir() string {
 	return os.Getenv("HOME")
 }
 
+// Retrives the System path entries (binary folders)
 func GetOSPathList() []string {
 	path := os.Getenv("Path")
 	if path == "" {
@@ -189,6 +190,7 @@ func GetOSPathList() []string {
 	return strings.Split(path, fmt.Sprintf("%c", os.PathListSeparator))
 }
 
+// Add a new entry to System path entries (binary folders)
 func AddToOSPathList(dir string) error {
 	if _, err := os.Stat(dir); err != nil {
 		return errors.New(fmt.Sprintf("Folder %s doesn't exist", dir))
@@ -206,10 +208,12 @@ func AddToOSPathList(dir string) error {
 	return nil
 }
 
+// Get a Random Path string, useful to create an unique temparary path
 func GetRandPath() string {
 	return uuid.New().String()
 }
 
+// Get new temparary folder path string
 func GetTempFolder(folder string) string {
 	return fmt.Sprintf("%s%c%s", os.TempDir(), os.PathSeparator, folder)
 }

@@ -7,11 +7,12 @@ import (
 	"strings"
 )
 
-const(
-	KUBECTL_CMD="kubectl"
-	HELM_CMD="helm"
+const (
+	KUBECTL_CMD = "kubectl"
+	HELM_CMD    = "helm"
 )
 
+// Execute a set of command in a single string
 func ExecuteCommandString(commandString string) (string, error) {
 	var err error
 	defer func() {
@@ -43,6 +44,7 @@ func ExecuteCommandString(commandString string) (string, error) {
 	return fmt.Sprintf("%s", stdoutStderr), err
 }
 
+// Execute a Command by tokens
 func ExecuteCommandArgs(command ...string) (string, error) {
 	var err error
 	defer func() {
@@ -70,6 +72,7 @@ func ExecuteCommandArgs(command ...string) (string, error) {
 	return fmt.Sprintf("%s", stdoutStderr), err
 }
 
+// Execute a Command with given arguments
 func ExecuteCommand(command string, cmdArgs ...string) (string, error) {
 	var err error
 	defer func() {
@@ -91,4 +94,3 @@ func ExecuteCommand(command string, cmdArgs ...string) (string, error) {
 	}
 	return fmt.Sprintf("%s", stdoutStderr), err
 }
-

@@ -14,21 +14,50 @@ import (
 )
 
 var (
+	// Error for Not Supported action/type/encoding
 	ErrTypeNotSupport = errors.New("Type not supported")
-	ErrIPInvalid      = errors.New("Invalid IP address")
+	// Error for Not Invalid action/type/encoding
+	ErrIPInvalid = errors.New("Invalid IP address")
 )
 
-func StringToInteger(v string) (int, bool) {
+// Convert a string to int typed value, and the success conversion flag
+func StringToInt(v string) (int, bool) {
 	if n, err := strconv.Atoi(v); err == nil {
 		return n, true
 	}
 	return 0, false
 }
 
+// Convert a string to uint64 typed value, and the success conversion flag
+func StringToUInt(v string, base int, bitSize int) (uint64, bool) {
+	if n, err := strconv.ParseUint(v, base, bitSize); err == nil {
+		return n, true
+	}
+	return 0, false
+}
+
+// Convert a string to long (int64) typed value, and the success conversion flag
+func StringToLong(v string, base int, bitSize int) (int64, bool) {
+	if n, err := strconv.ParseInt(v, base, bitSize); err == nil {
+		return n, true
+	}
+	return 0, false
+}
+
+// Convert a string to float (float64) typed value, and the success conversion flag
+func StringToFloat(v string, bitSize int) (float64, bool) {
+	if n, err := strconv.ParseFloat(v, bitSize); err == nil {
+		return n, true
+	}
+	return 0, false
+}
+
+// Convert a string to Datetime (time.Time), and reports eventually parsing errors
 func StringToDateTime(v string, layout string) (time.Time, error) {
 	return time.Parse(v, layout)
 }
 
+// Verify if a string item is present in a strings list
 func StringsListContainItem(elem string, elems []string, ignoreCase bool) bool {
 	if ignoreCase {
 		elemLower := strings.ToLower(elem)
@@ -47,6 +76,7 @@ func StringsListContainItem(elem string, elems []string, ignoreCase bool) bool {
 	return false
 }
 
+// Verify if an interface item is present in an interfaces list
 func GenericListContainItem(elem interface{}, elems []interface{}) bool {
 	for _, item := range elems {
 		if item == elem {
@@ -56,6 +86,7 @@ func GenericListContainItem(elem interface{}, elems []interface{}) bool {
 	return false
 }
 
+// Replace not needed characters from a text string, to remove everithing is not a letter, digit, dot or dash
 func ReplaceSimpleTextUnrelated(val string) (string, error) {
 	expr, err := regexp.Compile("[^a-zA-Z0-9.-]+")
 	if err != nil {
@@ -68,7 +99,8 @@ func ReplaceSimpleTextUnrelated(val string) (string, error) {
 	return value, nil
 }
 
-func NewUID() string {
+// Create a new Unique Identifier string
+func NewUniqueIdentifier() string {
 	return uuid.New().String()
 }
 

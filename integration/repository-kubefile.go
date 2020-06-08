@@ -12,8 +12,11 @@ type kubefileRepositoryManager struct {
 }
 
 const (
-	repositoryKubefilesIndexTemplate  = "%s%crepositories%c%s%ckubefiles%cindex.%v"
-	repositoryKubefilesFolderTemplate = "%s%crepositories%c%s%ckubefiles"
+	repositoryKubefilesIndexTemplate                = "%s%crepositories%c%s%ckubefiles%cindex.%v"
+	repositoryKubefilesFolderTemplate               = "%s%crepositories%c%s%ckubefiles"
+	repositoryKubefileDetailsIndexTemplate          = "%s%crepositories%c%s%ckubefiles%c%s%cindex.%v"
+	repositoryKubefileDetailsFolderTemplate         = "%s%crepositories%c%s%ckubefiles%c%s"
+	repositoryKubefileVersionsDetailsFolderTemplate = "%s%crepositories%c%s%ckubefiles%c%s%c%s"
 )
 
 func (k *kubefileRepositoryManager) VerifyKubeFile(name string, version string) error {

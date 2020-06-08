@@ -80,17 +80,85 @@ func (rn *repositoryManager) UpdateRepository(id string, r *model.Repository) mo
 	}
 }
 
-func (rn *repositoryManager) DeleteRepositories(q ...model.Query) model.DataResponse {
+func (rn *repositoryManager) checkFilter(r model.Repository, inclusive bool, q ...model.Query) bool {
+	if len(q) == 0 {
+		return true
+	}
+	var status = false
+	for _, qr := range q {
+		for _, qi := range qr.Items {
+			if inclusive {
+
+			}
+		}
+	}
+	return status
+}
+
+func (rn *repositoryManager) filter(inclusive bool, q ...model.Query) []model.Repository {
+	var out = make([]model.Repository, 0)
+	for _, r := range rn.manager.GetRepositoryList() {
+		if rn.checkFilter(r, inclusive, q...) {
+			out = append(out, r)
+		}
+	}
+	return out
+}
+
+func (rn *repositoryManager) DeleteRepositories(inclusive bool, q ...model.Query) model.DataResponse {
+	var respObjs = make([]interface{}, 0)
+	var list = rn.filter(inclusive, q...)
+	var message = ""
+	for _, r := range list {
+		r.State = model.StateDeleted
+		err := rn.manager.SaveRepository(r)
+		if err != nil {
+			if len(message) > 0 {
+				message += ", "
+			}
+			message += fmt.Sprintf("repository: %s - Error: %v", r.Name, err)
+		} else {
+			respObjs = append(respObjs, r)
+		}
+	}
+	var success = false
+	if len(message) == 0 {
+		success = true
+		message = "OK"
+	}
 	return model.DataResponse{
-		Success: false,
-		Message: "Not Implemented",
+		Success:         success,
+		Message:         message,
+		ResponseObjects: respObjs,
+		Changes:         int64(len(list)),
 	}
 }
 
-func (rn *repositoryManager) PurgeRepositories(q ...model.Query) model.DataResponse {
+func (rn *repositoryManager) PurgeRepositories(inclusive bool, q ...model.Query) model.DataResponse {
+	var respObjs = make([]interface{}, 0)
+	var list = rn.filter(inclusive, q...)
+	var message = ""
+	for _, r := range list {
+		err := rn.manager.DeleteRepositoryById(r.Id)
+		if err != nil {
+			if len(message) > 0 {
+				message += ", "
+			}
+			message += fmt.Sprintf("repository: %s - Error: %v", r.Name, err)
+		} else {
+			respObjs = append(respObjs, r)
+		}
+	}
+	var success = false
+	if len(message) == 0 {
+		success = true
+		message = "OK"
+	}
 	return model.DataResponse{
-		Success: false,
-		Message: "Not Implemented",
+		Success:         success,
+		Message:         message,
+		ResponseObjects: respObjs,
+		Changes:         int64(len(list)),
 	}
 }
 

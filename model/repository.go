@@ -4,6 +4,8 @@ package model
 type RepositoryStorageManager interface {
 	// Gets the list of existing repositories
 	GetRepositoryList() []Repository
+	// save an existing repository
+	SaveRepository(repository Repository) error
 	//Crete a new named repository, if the name is not in use yet
 	CreateRepository(name string) (*Repository, error)
 	//Update an existing repository or create a new named one, if the id is reflects to an existing reporisotry

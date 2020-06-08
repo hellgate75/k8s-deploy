@@ -19,6 +19,7 @@ const (
 	XML_FORMAT  FormatType = "xml"
 )
 
+// Load a structire, using file format type
 func LoadStructureByType(fullPath string, data interface{}, format FormatType) error {
 	var err error
 	defer func() {
@@ -47,6 +48,7 @@ func LoadStructureByType(fullPath string, data interface{}, format FormatType) e
 	return err
 }
 
+// Save a structire, using file format type
 func SaveStructureByType(fullPath string, data interface{}, format FormatType) error {
 	var err error
 	defer func() {
@@ -71,6 +73,7 @@ func SaveStructureByType(fullPath string, data interface{}, format FormatType) e
 	return err
 }
 
+// Save a structire, from a YAML file
 func SaveStructureToYamlFile(folder string, filePath string, data interface{}) error {
 	var err error
 	defer func() {
@@ -87,6 +90,7 @@ func SaveStructureToYamlFile(folder string, filePath string, data interface{}) e
 	return err
 }
 
+// Save a structire, from a JSON file
 func SaveStructureToJsonFile(folder string, filePath string, data interface{}) error {
 	var err error
 	defer func() {
@@ -103,6 +107,7 @@ func SaveStructureToJsonFile(folder string, filePath string, data interface{}) e
 	return err
 }
 
+// Load a structire, from a YAML file
 func LoadStructureFromYamlFile(folder string, filePath string, data interface{}) (interface{}, error) {
 	var err error
 	defer func() {
@@ -124,6 +129,7 @@ func LoadStructureFromYamlFile(folder string, filePath string, data interface{})
 	return data, err
 }
 
+// Load a structire, from a JSON file
 func LoadStructureFromJsonFile(fullPath string, data interface{}) error {
 	var err error
 	defer func() {
@@ -144,10 +150,12 @@ func LoadStructureFromJsonFile(fullPath string, data interface{}) error {
 	return err
 }
 
+// Convert a JSON fomatted text to structure
 func JsonToStructure(data string, itf interface{}) error {
 	return json.Unmarshal([]byte(data), itf)
 }
 
+// Convert a structure to JSON fomatted text
 func StructureToJson(itf interface{}) ([]byte, error) {
 	buff := bytes.NewBuffer([]byte{})
 	enc := json.NewEncoder(buff)
@@ -159,10 +167,12 @@ func StructureToJson(itf interface{}) ([]byte, error) {
 
 }
 
+// Define a printable object
 type Printable interface {
 	String() string
 }
 
+// Convert a structure to a representing string
 func StructToString(i interface{}) string {
 	if i == nil {
 		return "<nil>"

@@ -11,9 +11,17 @@ import (
 type EndPointType byte
 
 const (
+	// Kubernetes Repository Api Endpoint constant value
 	RepositoryEndpoint EndPointType = iota + 1
+	// Kubernetes Deploy Scheduler Api Endpoint constant value
+	SchedulerEndpoint
+	// Kubernetes Deploy Executor Api Endpoint constant value
+	ExecutorEndpoint
 )
 
+// Creates the API endpoints, profiled by EndPointType, accordingly to the requesting command.
+// Any command will have multiple sections/groups of APIs related to wanted
+// feature and service
 func CreateApiEndpoints(router *mux.Router,
 	authFunc func(h http.HandlerFunc) http.HandlerFunc,
 	dnsHandler func(serv RestService) http.HandlerFunc,
@@ -25,7 +33,7 @@ func CreateApiEndpoints(router *mux.Router,
 	repositoryStorageManager model.RepositoryStorageManager) error {
 	switch epType {
 	case RepositoryEndpoint:
-		createV1RegistryApiEndpoints(router, authFunc, dnsHandler, logger, hostBaseUrl, configuration.(model.KubeRepoConfig), dataManager, repositoryStorageManager)
+		addV1RepositoryApiEndpoints(router, authFunc, dnsHandler, logger, hostBaseUrl, configuration.(model.KubeRepoConfig), dataManager, repositoryStorageManager)
 		return nil
 	default:
 		return errors.New("Not implemented")
@@ -33,7 +41,8 @@ func CreateApiEndpoints(router *mux.Router,
 	//Create v1 APIs
 }
 
-func createV1RegistryApiEndpoints(router *mux.Router,
+// Add V1 Repository Endpoints to the Godzilla Router
+func addV1RepositoryApiEndpoints(router *mux.Router,
 	authFunc func(h http.HandlerFunc) http.HandlerFunc,
 	restHandler func(serv RestService) http.HandlerFunc,
 	logger log.Logger,

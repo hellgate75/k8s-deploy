@@ -7,6 +7,7 @@ import (
 	"net/http"
 )
 
+// Interface that describes the main feature of a Rest Service, used by a Rest Server
 type RestService interface {
 	Create(w http.ResponseWriter, r *http.Request)
 	Read(w http.ResponseWriter, r *http.Request)
@@ -14,11 +15,12 @@ type RestService interface {
 	Delete(w http.ResponseWriter, r *http.Request)
 }
 
+// Creates a V1 API Rest Service Instance
 func NewV1RegistryRootRestService(logger log.Logger, hostBaseUrl string,
 	configuration model.KubeRepoConfig,
 	dataManager model.RepositoryDataManager,
 	repositoryStorageManager model.RepositoryStorageManager) RestService {
-	return &v1.RestRegistryRootService{
+	return &v1.RestV1RepositoryRootService{
 		Log:                      logger,
 		BaseUrl:                  hostBaseUrl,
 		Configuration:            configuration,

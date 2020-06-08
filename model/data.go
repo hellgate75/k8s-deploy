@@ -73,9 +73,9 @@ type RepositoryDataManager interface {
 	//Add new k8srepo
 	UpdateRepository(id string, r *Repository) DataResponse
 	//Delete one or more repositories
-	DeleteRepositories(q ...Query) DataResponse
+	DeleteRepositories(inclusive bool, q ...Query) DataResponse
 	//Purge data for one or more repositories
-	PurgeRepositories(q ...Query) DataResponse
+	PurgeRepositories(inclusive bool, q ...Query) DataResponse
 	//Clear a repositories data entities selecting by id
 	ClearRepository(id string) DataResponse
 	//Clear a repositories data entities selecting by name

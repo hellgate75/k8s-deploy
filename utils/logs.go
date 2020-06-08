@@ -5,24 +5,26 @@
 package utils
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
 	"strings"
-	"errors"
 )
 
+// Structure that contains log index data
 type FileIndex struct {
-	Path	string
-	Size	int64
-	Index	int
+	Path  string
+	Size  int64
+	Index int
 }
 
+// Structure that retrieves index information structure from a file path and file extension
 func FileToIndex(path string, extension string) (FileIndex, error) {
 	fi, err := os.Stat(path)
 	if err != nil {
 		var index int = 0
-		txt:=strings.Split(path, ".")
+		txt := strings.Split(path, ".")
 		last := txt[len(txt)-1]
 		if strings.ToLower(last) != strings.ToLower(extension) {
 			num, err := strconv.Atoi(last)
@@ -36,8 +38,8 @@ func FileToIndex(path string, extension string) (FileIndex, error) {
 			return FileIndex{}, errors.New(fmt.Sprintf("Invalid file format: %s", path))
 		}
 		return FileIndex{
-			Path: path,
-			Size: fi.Size(),
+			Path:  path,
+			Size:  fi.Size(),
 			Index: index,
 		}, nil
 	}

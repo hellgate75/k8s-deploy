@@ -155,23 +155,23 @@ func (s *repositoryStorageManager) CreateRepository(name string) (*model.Reposit
 	}
 	var repoName = utils.ConvertName(name)
 	var newRepo = model.CreateRepository(
-		utils.NewUID(),
+		utils.NewUniqueIdentifier(),
 		repoName,
 		model.StateCreated)
 	// Create Repository Files
-	err = s.saveRepository(repoName, newRepo)
+	err = saveRepository(s.dataFolder, s.logger, repoName, newRepo)
 	if err != nil {
 		return nil, err
 	}
 
 	// Create Repository Charts File
-	err = s.saveCharts(repoName, newRepo.GetCharts())
+	err = saveCharts(s.dataFolder, s.logger, repoName, newRepo.GetCharts())
 	if err != nil {
 		return nil, err
 	}
 
 	// Create Repository Kubernetes Charts
-	err = s.saveKubernetesFiles(repoName, newRepo.GetKubernetesFiles())
+	err = saveKubernetesFiles(s.dataFolder, s.logger, repoName, newRepo.GetKubernetesFiles())
 	if err != nil {
 		return nil, err
 	}
@@ -248,7 +248,17 @@ func (s *repositoryStorageManager) UpdateRepository(id string, r model.Repositor
 			}
 		}
 	}
-	err = s.saveRepository(repo.Name, *repo)
+
+	err = saveRepository(s.dataFolder, s.logger, repo.Name, *repo)
+	if err != nil {
+		return nil, err
+	}
+
+	err = saveCharts(s.dataFolder, s.logger, repo.Name, repo.GetCharts())
+	if err != nil {
+		return nil, err
+	}
+	err = saveKubernetesFiles(s.dataFolder, s.logger, repo.Name, repo.GetKubernetesFiles())
 	if err != nil {
 		return nil, err
 	}
@@ -266,15 +276,34 @@ func (s *repositoryStorageManager) UpdateRepository(id string, r model.Repositor
 		}
 		err = s.SavePoint()
 	}
-	err = s.saveCharts(repo.Name, repo.GetCharts())
-	if err != nil {
-		return nil, err
-	}
-	err = s.saveKubernetesFiles(repo.Name, repo.GetKubernetesFiles())
-	if err != nil {
-		return nil, err
-	}
 	return repo, err
+}
+
+func (s *repositoryStorageManager) SaveRepository(repository model.Repository) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+	}()
+	// Save Repository Files
+	err = saveRepository(s.dataFolder, s.logger, repository.Name, repository)
+	if err != nil {
+		return err
+	}
+
+	// Save Repository Charts File
+	err = saveCharts(s.dataFolder, s.logger, repository.Name, repository.GetCharts())
+	if err != nil {
+		return err
+	}
+
+	// Save Repository Kubernetes Charts
+	err = saveKubernetesFiles(s.dataFolder, s.logger, repository.Name, repository.GetKubernetesFiles())
+	if err != nil {
+		return err
+	}
+	return err
 }
 
 func (s *repositoryStorageManager) OverrideRepository(id string, r model.Repository) (*model.Repository, error) {
@@ -298,7 +327,7 @@ func (s *repositoryStorageManager) OverrideRepository(id string, r model.Reposit
 	var oldName = repo.Name
 	var newName = r.Name
 	var changeName = false
-	if oldName != repo.Name {
+	if oldName != newName {
 		changeName = true
 	}
 	var mergeWithRepo = false
@@ -309,49 +338,78 @@ func (s *repositoryStorageManager) OverrideRepository(id string, r model.Reposit
 		}
 		mergeWithRepo = true
 	}
-	var file = fmt.Sprintf(repositoryDetailsIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, r.Name, os.PathSeparator, repositoryFormatExtension)
-	if changeName {
-		var oldFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName)
-		var newFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, newName)
-		if mergeWithRepo {
-			var mergeFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, mergeRepository.Name)
-			if !utils.ExistsFileOrFolder(oldFolder) && !utils.ExistsFileOrFolder(mergeFolder) {
+	var oldFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName)
+	var newFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, newName)
+	var changed = false
+	var returnRepo *model.Repository
+	if mergeWithRepo {
+		if len(r.GetCharts()) > 0 {
+			mergeRepository.AddCharts(r.GetCharts()...)
+		}
+		if len(r.GetKubernetesFiles()) > 0 {
+			mergeRepository.AddKubernetesFiles(r.GetKubernetesFiles()...)
+		}
+		var mergeFolder = fmt.Sprintf(repositoryDetailsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, mergeRepository.Name)
+		if !utils.ExistsFileOrFolder(oldFolder) && !utils.ExistsFileOrFolder(mergeFolder) {
+			if s.logger != nil {
+				s.logger.Debugf("Creating new folder for repository: %s", newName)
+			}
+			err := utils.CleanCreateFolder(newFolder)
+			if err != nil {
+				return nil, err
+			}
+			returnRepo = &r
+		} else {
+			changed = true
+			// We have to move the files, only the listed repository files
+			// From old repo to merge repo
+			if s.logger != nil {
+				s.logger.Debugf("Moving chars, kubefiles from repository: %s to repository %s", oldName, mergeRepository.Name)
+			}
+			if changeName {
 				if s.logger != nil {
-					s.logger.Debugf("Creating new folder for repository: %s", newName)
-				}
-				err := utils.CleanCreateFolder(newFolder)
-				if err != nil {
-					return nil, err
+					s.logger.Debugf("Requested merging repository to repository: %s", oldName, mergeRepository.Name)
 				}
 			} else {
-				if changeName {
-					// We have to move the files, only the listed repository files
-					// From old repo to merge repo
-
-					if s.logger != nil {
-						s.logger.Debugf("Renaming folder for repository: %s to repository %s", oldName, repo.Name)
-					}
-					err = os.Rename(oldFolder, newFolder)
-					if err != nil {
-						return nil, err
-					}
-				} else {
-					// We have to move the files, only the listed repository files
-					// From repo to merge repo
-					if s.logger != nil {
-						s.logger.Debugf("No name changes in repository: %s", repo.Name)
-					}
+				// We have to move the files, only the listed repository files
+				// From repo to merge repo
+				if s.logger != nil {
+					s.logger.Debugf("No name changes in repository: %s", repo.Name)
 				}
 			}
-		} else {
+			var oldRepositoryChartsFolder = fmt.Sprintf(repositoryChartsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName, os.PathSeparator)
+			var oldRepositoryKubefilesFolder = fmt.Sprintf(repositoryKubefilesFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName, os.PathSeparator)
+			_, _, err = utils.MoveFileToFolder(oldRepositoryChartsFolder, mergeFolder)
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Debugf("Errors moving chars from repository: %s to repository %s", oldName, mergeRepository.Name)
+				}
+			}
+			_, _, err = utils.MoveFileToFolder(oldRepositoryKubefilesFolder, mergeFolder)
+			if err != nil {
+				if s.logger != nil {
+					s.logger.Debugf("Errors moving Kubernetes files from repository: %s to repository %s", oldName, mergeRepository.Name)
+				}
+			}
+			returnRepo = mergeRepository
+		}
+	} else {
+		changed = true
+		if changeName {
+			repo.Name = newName
 			if !utils.ExistsFileOrFolder(oldFolder) {
 				if s.logger != nil {
 					s.logger.Debugf("Creating new folder for repository: %s", repo.Name)
 				}
-				err := utils.CleanCreateFolder(newFolder)
+				_, err := s.CreateRepository(newName)
 				if err != nil {
 					return nil, err
 				}
+				err = s.SaveRepository(r)
+				if err != nil {
+					return nil, err
+				}
+				returnRepo = &r
 			} else {
 				if oldName != repo.Name {
 					if s.logger != nil {
@@ -366,32 +424,95 @@ func (s *repositoryStorageManager) OverrideRepository(id string, r model.Reposit
 						s.logger.Debugf("No name changes in repository: %s", repo.Name)
 					}
 				}
+				returnRepo = repo
+			}
+			changed = true
+		} else {
+			if s.logger != nil {
+				s.logger.Debugf("No name changes in repository: %s", repo.Name)
 			}
 		}
-	} else {
-
 	}
-	err = utils.SaveStructureByType(file, repo, repositoryFormatExtension)
-	if err != nil {
-		return nil, err
-	}
-	if oldName != repo.Name {
-		var changed = false
-		for idx, rr := range s.repositories.Repositories {
-			if rr.Id == repo.Id {
-				s.repositories.Repositories[idx].Name = r.Name
-				changed = true
+	if changed {
+		err = s.SaveRepository(*returnRepo)
+		if err != nil {
+			return nil, err
+		}
+		if mergeWithRepo {
+			err = s.DeleteRepositoryById(repo.Id)
+		} else {
+			if oldName != repo.Name {
+				var changed = false
+				for idx, rr := range s.repositories.Repositories {
+					if rr.Id == repo.Id {
+						s.repositories.Repositories[idx].Name = r.Name
+						changed = true
+					}
+				}
+				if !changed {
+					return nil, errors.New(fmt.Sprintf("Unable to continue, no changes because id: %s was not found in cluster list.", id))
+				}
+				err = s.SavePoint()
 			}
 		}
-		if !changed {
-			return nil, errors.New(fmt.Sprintf("Unable to continue, no changes because id: %s was not found in cluster list.", id))
-		}
-		err = s.SavePoint()
 	}
-	return repo, err
+	return returnRepo, err
 }
 
 func (s *repositoryStorageManager) DeleteRepositoryByName(name string) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+		s.Unlock()
+	}()
+	s.Lock()
+	if !s.containsRepositoryName(name) {
+		return errors.New(fmt.Sprintf("Repository name %s not present", name))
+	}
+	var repoName = utils.ConvertName(name)
+	if repoName == defaultRepositoryName {
+		return errors.New(fmt.Sprintf("Repository name %s cannot be deleted, it's the default repository", repoName))
+	}
+	if r, err := s.GetRepository(name); err == nil {
+		r.State = model.StateDeleted
+		err = saveRepository(s.dataFolder, s.logger, r.Name, *r)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Repository with name %s not saved, Error: %v", name, err))
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("Repository with name %s not found in list, Error: %v", name, err))
+	}
+	return err
+}
+
+func (s *repositoryStorageManager) DeleteRepositoryById(id string) error {
+	var err error
+	defer func() {
+		if r := recover(); r != nil {
+			err = errors.New(fmt.Sprintf("%v", r))
+		}
+	}()
+	if !s.containsRepositoryId(id) {
+		return errors.New(fmt.Sprintf("Repository id %s not present", id))
+	}
+	if id == s.getDefefaultRepositoryId() {
+		return errors.New(fmt.Sprintf("Repository id %s cannot be deleted, it's the default repository", id))
+	}
+	if r, err := s.GetRepositoryById(id); err == nil {
+		r.State = model.StateDeleted
+		err = saveRepository(s.dataFolder, s.logger, r.Name, *r)
+		if err != nil {
+			err = errors.New(fmt.Sprintf("Repository %s not not saved, Error: %v", id, err))
+		}
+	} else {
+		err = errors.New(fmt.Sprintf("Repository %s not found in list, Error: %v", id, err))
+	}
+	return err
+}
+
+func (s *repositoryStorageManager) PurgeRepositoryByName(name string) error {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
@@ -434,15 +555,13 @@ func (s *repositoryStorageManager) DeleteRepositoryByName(name string) error {
 	return err
 }
 
-func (s *repositoryStorageManager) DeleteRepositoryById(id string) error {
+func (s *repositoryStorageManager) PurgeRepositoryById(id string) error {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
 			err = errors.New(fmt.Sprintf("%v", r))
 		}
-		s.Unlock()
 	}()
-	s.Lock()
 	if !s.containsRepositoryId(id) {
 		return errors.New(fmt.Sprintf("Repository id %s not present", id))
 	}
