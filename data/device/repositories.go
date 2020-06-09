@@ -5,6 +5,7 @@ import (
 	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 	"github.com/hellgate75/k8s-deploy/utils"
+	model2 "github.com/hellgate75/k8s-deploy/utils/model"
 	"os"
 )
 
@@ -80,19 +81,41 @@ func (rn *repositoryManager) UpdateRepository(id string, r *model.Repository) mo
 	}
 }
 
+func checkRepositoryValue(r model.Repository, key string, value string, cond model.Aggregator) bool {
+	switch key {
+	case "name":
+		return model2.CompareValues(value, r.Name, model2.DataTypeString, cond)
+	case "id":
+		return model2.CompareValues(value, r.Id, model2.DataTypeString, cond)
+	case "state":
+		return model2.CompareValues(value, fmt.Sprintf("%v", r.State), model2.DataTypeNumber, cond)
+	case "charts":
+		return model2.CompareValues(value, fmt.Sprintf("%v", len(r.GetCharts())), model2.DataTypeNumber, cond)
+	case "kubernetesFiles":
+		return model2.CompareValues(value, fmt.Sprintf("%v", len(r.GetKubernetesFiles())), model2.DataTypeNumber, cond)
+	}
+	return false
+}
+
 func (rn *repositoryManager) checkFilter(r model.Repository, inclusive bool, q ...model.Query) bool {
 	if len(q) == 0 {
 		return true
 	}
-	var status = false
 	for _, qr := range q {
 		for _, qi := range qr.Items {
-			if inclusive {
-
+			var sKey = utils.TrimFieldName(qi.Key)
+			if checkRepositoryValue(r, sKey, qi.Value, qi.Aggregator) {
+				if inclusive {
+					return true
+				}
+			} else {
+				if !inclusive {
+					return false
+				}
 			}
 		}
 	}
-	return status
+	return false
 }
 
 func (rn *repositoryManager) filter(inclusive bool, q ...model.Query) []model.Repository {

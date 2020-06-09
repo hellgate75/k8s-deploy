@@ -1,6 +1,11 @@
 package model
 
-import "github.com/hellgate75/k8s-deploy/model"
+import (
+	"github.com/hellgate75/k8s-deploy/model"
+	"github.com/hellgate75/k8s-deploy/utils"
+	"strconv"
+	"strings"
+)
 
 // Remove duplicates Kubernetes Helm charts in an array
 func RemoveChartsDuplicates(c []model.Chart) []model.Chart {
@@ -80,4 +85,117 @@ func ExtractDiffsInKubernetesFilesList(source []model.KubernetesFile, compare []
 		}
 	}
 	return out
+}
+
+type DataType byte
+
+const (
+	DataTypeString DataType = iota + 1
+	DataTypeNumber
+	DataTypeDecimal
+	DataTypeDateTime
+	DataTypeBool
+)
+
+func compareStringValues(value1, value2 string, cond model.Aggregator) bool {
+	switch cond {
+	case model.AggregatorEq:
+		return value1 == value2
+	case model.AggregatorLike:
+		return strings.Contains(value1, value2)
+	case model.AggregatorNotLike:
+		return !strings.Contains(value1, value2)
+	case model.AggregatorNeq:
+		return value1 != value2
+	case model.AggregatorIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNotIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return !utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNot:
+		return false
+	}
+	return false
+}
+
+func compareNumberValues(value1, value2 string, cond model.Aggregator) bool {
+	switch cond {
+	case model.AggregatorEq, model.AggregatorLike:
+		return value1 == value2
+	case model.AggregatorNeq, model.AggregatorNotLike:
+		return value1 != value2
+	case model.AggregatorIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNotIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return !utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNot:
+		return false
+	}
+	return false
+}
+
+func compareDateTimeValues(value1, value2 string, cond model.Aggregator) bool {
+	switch cond {
+	case model.AggregatorEq, model.AggregatorLike:
+		return value1 == value2
+	case model.AggregatorNeq, model.AggregatorNotLike:
+		return value1 != value2
+	case model.AggregatorIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNotIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return !utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNot:
+		return false
+	}
+	return false
+}
+
+func compareBoolValues(value1, value2 string, cond model.Aggregator) bool {
+	switch cond {
+	case model.AggregatorEq, model.AggregatorLike:
+		return value1 == value2
+	case model.AggregatorNeq, model.AggregatorNotLike:
+		return value1 != value2
+	case model.AggregatorIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNotIn:
+		// Case In
+		var arr = strings.Split(value2, ",")
+		return !utils.StringsListContainItem(value1, arr, true)
+	case model.AggregatorNot:
+		b1, err1 := strconv.ParseBool(value1)
+		b2, err2 := strconv.ParseBool(value2)
+		if err1 != nil || err2 != nil {
+			return false
+		}
+		return !b1 && !b2
+	}
+	return false
+}
+
+func CompareValues(value1, value2 string, dType DataType, cond model.Aggregator) bool {
+	switch dType {
+	case DataTypeString:
+		return compareStringValues(value1, value2, cond)
+	case DataTypeNumber, DataTypeDecimal:
+		return compareStringValues(value1, value2, cond)
+	case DataTypeDateTime:
+		return compareDateTimeValues(value1, value2, cond)
+	case DataTypeBool:
+		return compareBoolValues(value1, value2, cond)
+	}
+	return false
 }

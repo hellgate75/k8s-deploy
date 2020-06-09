@@ -9,6 +9,7 @@ import (
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 type FormatType string
@@ -18,6 +19,10 @@ const (
 	JSON_FORMAT FormatType = "json"
 	XML_FORMAT  FormatType = "xml"
 )
+
+func TrimFieldName(s string) string {
+	return strings.ToLower(strings.TrimSpace(s))
+}
 
 // Load a structire, using file format type
 func LoadStructureByType(fullPath string, data interface{}, format FormatType) error {
