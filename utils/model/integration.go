@@ -8,8 +8,8 @@ import (
 )
 
 // Remove duplicates Kubernetes Helm charts in an array
-func RemoveChartsDuplicates(c []model.Chart) []model.Chart {
-	var charts = make([]model.Chart, 0)
+func RemoveChartsDuplicates(c []model.ChartInfo) []model.ChartInfo {
+	var charts = make([]model.ChartInfo, 0)
 	var reg = make(map[string]bool)
 	for _, ch := range c {
 		if _, ok := reg[ch.Name]; !ok {
@@ -21,8 +21,8 @@ func RemoveChartsDuplicates(c []model.Chart) []model.Chart {
 }
 
 // Remove duplicates Kubernetes files in an array
-func RemoveKubernetesFilesDuplicates(c []model.KubernetesFile) []model.KubernetesFile {
-	var kubernetesFiles = make([]model.KubernetesFile, 0)
+func RemoveKubernetesFilesDuplicates(c []model.KubernetesFileInfo) []model.KubernetesFileInfo {
+	var kubernetesFiles = make([]model.KubernetesFileInfo, 0)
 	var reg = make(map[string]bool)
 	for _, kf := range c {
 		if _, ok := reg[kf.Name]; !ok {

@@ -113,7 +113,7 @@ func (s *repositoryStorageManager) GetRepositoryById(id string) (*model.Reposito
 			file = fmt.Sprintf(repositoryChartsIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
 			var chartsFileList = model.ChartList{
 				RepoName: repo.Name,
-				Charts:   make([]model.Chart, 0),
+				Charts:   make([]model.ChartInfo, 0),
 			}
 			err = utils.LoadStructureByType(file, &chartsFileList, repositoryFormatExtension)
 			if err != nil {
@@ -123,9 +123,9 @@ func (s *repositoryStorageManager) GetRepositoryById(id string) (*model.Reposito
 			repository.ReplaceCharts(chartsFileList.Charts...)
 			// Load kubernetes files related to the repository
 			file = fmt.Sprintf(repositoryKubernetesFilesIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
-			var kubernetesFileList = model.KubeFileList{
+			var kubernetesFileList = model.KubernetesFileList{
 				RepoName: repo.Name,
-				Files:    make([]model.KubernetesFile, 0),
+				Files:    make([]model.KubernetesFileInfo, 0),
 			}
 			err = utils.LoadStructureByType(file, &kubernetesFileList, repositoryFormatExtension)
 			if err != nil {
@@ -636,7 +636,7 @@ func (s *repositoryStorageManager) RenameRepository(oldName string, newName stri
 	return err
 }
 
-func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.Chart, error) {
+func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.ChartInfo, error) {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
@@ -645,7 +645,7 @@ func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.Char
 		s.RUnlock()
 	}()
 	s.RLock()
-	var outList = make([]model.Chart, 0)
+	var outList = make([]model.ChartInfo, 0)
 	if !s.containsRepositoryId(id) {
 		return outList, errors.New(fmt.Sprintf("Repository id %s not present", id))
 	}
@@ -681,7 +681,7 @@ func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.Char
 						}
 						var chartsList = model.ChartList{
 							RepoName: repo.Name,
-							Charts:   make([]model.Chart, 0),
+							Charts:   make([]model.ChartInfo, 0),
 						}
 						err = utils.LoadStructureByType(file, &chartsList, repositoryFormatExtension)
 						if err == nil {
@@ -708,7 +708,7 @@ func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.Char
 	return outList, err
 }
 
-func (s *repositoryStorageManager) ListRepositoryKubernetesFiles(id string) ([]model.KubernetesFile, error) {
+func (s *repositoryStorageManager) ListRepositoryKubernetesFiles(id string) ([]model.KubernetesFileInfo, error) {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
@@ -717,7 +717,7 @@ func (s *repositoryStorageManager) ListRepositoryKubernetesFiles(id string) ([]m
 		s.RUnlock()
 	}()
 	s.RLock()
-	var outList = make([]model.KubernetesFile, 0)
+	var outList = make([]model.KubernetesFileInfo, 0)
 	if !s.containsRepositoryId(id) {
 		return outList, errors.New(fmt.Sprintf("Repository id %s not present", id))
 	}
@@ -751,9 +751,9 @@ func (s *repositoryStorageManager) ListRepositoryKubernetesFiles(id string) ([]m
 							}
 							return outList, errors.New(fmt.Sprintf("No repository id: %s contains file path: %s with wrong extension, expected: %v", id, file, repositoryFormatExtension))
 						}
-						var chartsList = model.KubeFileList{
+						var chartsList = model.KubernetesFileList{
 							RepoName: repo.Name,
-							Files:    make([]model.KubernetesFile, 0),
+							Files:    make([]model.KubernetesFileInfo, 0),
 						}
 						err = utils.LoadStructureByType(file, &chartsList, repositoryFormatExtension)
 						if err == nil {

@@ -19,9 +19,9 @@ type RepositoryStorageManager interface {
 	// Rename a given repository
 	RenameRepository(oldName string, newName string) error
 	// List all repository charts
-	ListRepositoryCharts(id string) ([]Chart, error)
+	ListRepositoryCharts(id string) ([]ChartInfo, error)
 	// List all repository Kubernetes yaml files
-	ListRepositoryKubernetesFiles(id string) ([]KubernetesFile, error)
+	ListRepositoryKubernetesFiles(id string) ([]KubernetesFileInfo, error)
 	// Backup an existing repository
 	BackupRepository(id string, archiveFile string, useZipFormat bool) error
 	// Restore an existing repository from zip/tar archive

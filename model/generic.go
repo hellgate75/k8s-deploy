@@ -194,6 +194,35 @@ func (ver *VersionDetails) LoadJson(path string) error {
 	return utils.LoadStructureFromJsonFile(path, ver)
 }
 
+type ChartInfo struct {
+	Id   string `yaml:"id" json:"id" xml:"id"`
+	Name string `yaml:"name" json:"name" xml:"name"`
+}
+
+func (ch *ChartInfo) ToJson() (string, error) {
+	d, err := utils.StructureToJson(ch)
+	if err != nil {
+		return "", err
+	}
+	return string(d), nil
+}
+
+func (ch *ChartInfo) String() string {
+	s, err := ch.ToJson()
+	if err != nil {
+		return fmt.Sprintf("<error:%s>", err.Error())
+	}
+	return s
+}
+
+func (ch *ChartInfo) FromJson(d string) error {
+	return utils.JsonToStructure(d, ch)
+}
+
+func (ch *ChartInfo) LoadJson(path string) error {
+	return utils.LoadStructureFromJsonFile(path, ch)
+}
+
 type Chart struct {
 	Id       string    `yaml:"id" json:"id" xml:"id"`
 	Name     string    `yaml:"name" json:"name" xml:"name"`
@@ -223,6 +252,35 @@ func (ch *Chart) FromJson(d string) error {
 
 func (ch *Chart) LoadJson(path string) error {
 	return utils.LoadStructureFromJsonFile(path, ch)
+}
+
+type KubernetesFileInfo struct {
+	Id   string `yaml:"id" json:"id" xml:"id"`
+	Name string `yaml:"name" json:"name" xml:"name"`
+}
+
+func (kf *KubernetesFileInfo) ToJson() (string, error) {
+	d, err := utils.StructureToJson(kf)
+	if err != nil {
+		return "", err
+	}
+	return string(d), nil
+}
+
+func (kf *KubernetesFileInfo) String() string {
+	s, err := kf.ToJson()
+	if err != nil {
+		return fmt.Sprintf("<error:%s>", err.Error())
+	}
+	return s
+}
+
+func (kf *KubernetesFileInfo) FromJson(d string) error {
+	return utils.JsonToStructure(d, kf)
+}
+
+func (kf *KubernetesFileInfo) LoadJson(path string) error {
+	return utils.LoadStructureFromJsonFile(path, kf)
 }
 
 type KubernetesFile struct {
@@ -258,31 +316,31 @@ func (kf *KubernetesFile) LoadJson(path string) error {
 
 func CreateRepository(id string, name string, state State) Repository {
 	return Repository{
-		Id:        id,
-		Name:      name,
-		State:     state,
-		charts:    make([]Chart, 0),
-		kubeFiles: make([]KubernetesFile, 0),
+		Id:              id,
+		Name:            name,
+		State:           state,
+		charts:          make([]ChartInfo, 0),
+		kubernetesFiles: make([]KubernetesFileInfo, 0),
 	}
 }
 
 type Repository struct {
-	Id        string `yaml:"id" json:"id" xml:"id"`
-	Name      string `yaml:"name" json:"name" xml:"name"`
-	charts    []Chart
-	kubeFiles []KubernetesFile
-	State     State `yaml:"state" json:"state" xml:"state"`
+	Id              string `yaml:"id" json:"id" xml:"id"`
+	Name            string `yaml:"name" json:"name" xml:"name"`
+	charts          []ChartInfo
+	kubernetesFiles []KubernetesFileInfo
+	State           State `yaml:"state" json:"state" xml:"state"`
 }
 
-func (r *Repository) GetCharts() []Chart {
+func (r *Repository) GetCharts() []ChartInfo {
 	return r.charts
 }
 
-func (r *Repository) ReplaceCharts(c ...Chart) {
+func (r *Repository) ReplaceCharts(c ...ChartInfo) {
 	r.charts = c
 }
 
-func (r *Repository) AddCharts(c ...Chart) {
+func (r *Repository) AddCharts(c ...ChartInfo) {
 	r.charts = append(r.charts, c...)
 }
 
@@ -293,22 +351,22 @@ func (r *Repository) GetChartList() ChartList {
 	}
 }
 
-func (r *Repository) GetKubernetesFiles() []KubernetesFile {
-	return r.kubeFiles
+func (r *Repository) GetKubernetesFiles() []KubernetesFileInfo {
+	return r.kubernetesFiles
 }
 
-func (r *Repository) ReplaceKubernetesFiles(f ...KubernetesFile) {
-	r.kubeFiles = f
+func (r *Repository) ReplaceKubernetesFiles(f ...KubernetesFileInfo) {
+	r.kubernetesFiles = f
 }
 
-func (r *Repository) AddKubernetesFiles(f ...KubernetesFile) {
-	r.kubeFiles = append(r.kubeFiles, f...)
+func (r *Repository) AddKubernetesFiles(f ...KubernetesFileInfo) {
+	r.kubernetesFiles = append(r.kubernetesFiles, f...)
 }
 
-func (r *Repository) GetKubernetesFileList() KubeFileList {
-	return KubeFileList{
+func (r *Repository) GetKubernetesFileList() KubernetesFileList {
+	return KubernetesFileList{
 		RepoName: r.Name,
-		Files:    r.kubeFiles,
+		Files:    r.kubernetesFiles,
 	}
 }
 

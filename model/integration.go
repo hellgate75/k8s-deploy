@@ -14,11 +14,11 @@ type Repositories struct {
 }
 
 type ChartList struct {
-	RepoName string  `yaml:"repository" json:"repository" xml:"repository"`
-	Charts   []Chart `yaml:"charts" json:"charts" xml:"chart"`
+	RepoName string      `yaml:"repository" json:"repository" xml:"repository"`
+	Charts   []ChartInfo `yaml:"charts" json:"charts" xml:"chart"`
 }
 
-type KubeFileList struct {
-	RepoName string           `yaml:"repository" json:"repository" xml:"repository"`
-	Files    []KubernetesFile `yaml:"files" json:"files" xml:"file"`
+type KubernetesFileList struct {
+	RepoName string               `yaml:"repository" json:"repository" xml:"repository"`
+	Files    []KubernetesFileInfo `yaml:"files" json:"files" xml:"file"`
 }

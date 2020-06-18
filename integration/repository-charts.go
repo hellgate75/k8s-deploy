@@ -1,6 +1,7 @@
 package integration
 
 import (
+	"fmt"
 	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 )
@@ -9,15 +10,15 @@ type chartsRepositoryManager struct {
 	repository model.Repository
 	dataFolder string
 	logger     log.Logger
-	charts     []model.Chart
+	charts     []model.ChartInfo
 }
 
 const (
-	repositoryChartsIndexTemplate                = "%s%crepositories%c%s%ccharts%cindex.%v"
-	repositoryChartsFolderTemplate               = "%s%crepositories%c%s%ccharts"
 	repositoryChartDetailsIndexTemplate          = "%s%crepositories%c%s%ccharts%c%s%cindex.%v"
 	repositoryChartDetailsFolderTemplate         = "%s%crepositories%c%s%ccharts%c%s"
 	repositoryChartVersionsDetailsFolderTemplate = "%s%crepositories%c%s%ccharts%c%s%c%s"
+	repositoryChartsIndexTemplate                = "%s%crepositories%c%s%ccharts%cindex.%v"
+	repositoryChartsFolderTemplate               = "%s%crepositories%c%s%ccharts"
 )
 
 func (c *chartsRepositoryManager) VerifyChart(name string, version string) error {
@@ -32,7 +33,11 @@ func (c *chartsRepositoryManager) DeleteChartVersion(name string, version string
 	panic("implement me")
 }
 
+func getChartIndexFile(baseFolder string, chartName string) string {
+	return fmt.Sprintf(repositoryChartsFolderTemplate, baseFolder, chartName)
+}
 func (c *chartsRepositoryManager) DeleteEntireChart(name string, version string) error {
+
 	panic("implement me")
 }
 
@@ -86,6 +91,6 @@ func NewRepositoryChartManager(repository model.Repository, dataFolder string, l
 		repository: repository,
 		dataFolder: dataFolder,
 		logger:     logger,
-		charts:     make([]model.Chart, 0),
+		charts:     make([]model.ChartInfo, 0),
 	}).init()
 }

@@ -8,6 +8,30 @@ import (
 	"os"
 )
 
+func getChartsListFolder(baseFolder string, repoName string) string {
+	return fmt.Sprintf(repositoryChartsFolderTemplate, baseFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator)
+}
+
+func getChartsListIndex(baseFolder string, repoName string, extension utils.FormatType) string {
+	//repositoryChartsIndexTemplate                = "%s%crepositories%c%s%ccharts%cindex.%v"
+	return fmt.Sprintf(repositoryChartsIndexTemplate, baseFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, extension)
+}
+
+func getChartDetailsFolder(baseFolder string, repoName string, chartName string) string {
+	//repositoryChartDetailsFolderTemplate         = "%s%crepositories%c%s%ccharts%c%s"
+	return fmt.Sprintf(repositoryChartDetailsFolderTemplate, baseFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, chartName)
+}
+
+func getChartDetailsIndex(baseFolder string, repoName string, chartName string, extension utils.FormatType) string {
+	//repositoryChartDetailsIndexTemplate          = "%s%crepositories%c%s%ccharts%c%s%cindex.%v"
+	return fmt.Sprintf(repositoryChartDetailsIndexTemplate, baseFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, chartName, os.PathSeparator, extension)
+}
+
+func getChartVersionFolder(baseFolder string, repoName string, chartName string, version string) string {
+	//repositoryChartVersionsDetailsFolderTemplate = "%s%crepositories%c%s%ccharts%c%s%c%s"
+	return fmt.Sprintf(repositoryChartDetailsFolderTemplate, baseFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, chartName, os.PathSeparator, version)
+}
+
 func saveRepository(dataFolder string, logger log.Logger, repoName string, repo model.Repository) error {
 	// Create Repository files
 	var file = fmt.Sprintf(repositoryDetailsIndexTemplate, dataFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, repositoryFormatExtension)
@@ -28,18 +52,18 @@ func saveRepository(dataFolder string, logger log.Logger, repoName string, repo 
 	return utils.SaveStructureByType(file, &repo, repositoryFormatExtension)
 }
 
-func saveCharts(dataFolder string, logger log.Logger, repoName string, charts []model.Chart) error {
+func saveCharts(dataFolder string, logger log.Logger, repoName string, charts []model.ChartInfo) error {
 	var chartFileList = model.ChartList{
 		RepoName: repoName,
 		Charts:   charts,
 	}
 	// Create Repository Charts File
-	var file = fmt.Sprintf(repositoryChartsIndexTemplate, dataFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
+	var file = getChartsListIndex(dataFolder, repoName, repositoryFormatExtension)
 	if logger != nil {
 		logger.Warnf("Saving charts file %s for repository %s", file, repoName)
 		logger.Warnf("Number of saved charts %v for repository %s", len(charts), repoName)
 	}
-	var folder = fmt.Sprintf(repositoryChartsFolderTemplate, dataFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator)
+	var folder = getChartsListFolder(dataFolder, repoName)
 	if !utils.ExistsFileOrFolder(folder) {
 		err := utils.CleanCreateFolder(folder)
 		if err != nil {
@@ -53,18 +77,18 @@ func saveCharts(dataFolder string, logger log.Logger, repoName string, charts []
 	return utils.SaveStructureByType(file, &chartFileList, repositoryFormatExtension)
 }
 
-func loadCharts(dataFolder string, logger log.Logger, repoName string) ([]model.Chart, error) {
-	var emptyChartList = make([]model.Chart, 0)
+func loadCharts(dataFolder string, logger log.Logger, repoName string) ([]model.ChartInfo, error) {
+	var emptyChartList = make([]model.ChartInfo, 0)
 	var chartFileList = model.ChartList{
 		RepoName: repoName,
 		Charts:   emptyChartList,
 	}
 	// Load Repository Charts File
-	var file = fmt.Sprintf(repositoryChartsIndexTemplate, dataFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
+	var file = getChartsListIndex(dataFolder, repoName, repositoryFormatExtension)
 	if logger != nil {
 		logger.Warnf("Loading charts file %s for repository %s", file, repoName)
 	}
-	var folder = fmt.Sprintf(repositoryChartsFolderTemplate, dataFolder, os.PathSeparator, os.PathSeparator, repoName, os.PathSeparator)
+	var folder = getChartsListFolder(dataFolder, repoName)
 	if !utils.ExistsFileOrFolder(folder) {
 		_ = utils.CleanCreateFolder(folder)
 		if logger != nil {
@@ -82,8 +106,8 @@ func loadCharts(dataFolder string, logger log.Logger, repoName string) ([]model.
 	return chartList, nil
 }
 
-func saveKubernetesFiles(dataFolder string, logger log.Logger, repoName string, kubernetesFiles []model.KubernetesFile) error {
-	var kubernetesFileList = model.KubeFileList{
+func saveKubernetesFiles(dataFolder string, logger log.Logger, repoName string, kubernetesFiles []model.KubernetesFileInfo) error {
+	var kubernetesFileList = model.KubernetesFileList{
 		RepoName: repoName,
 		Files:    kubernetesFiles,
 	}
@@ -107,9 +131,9 @@ func saveKubernetesFiles(dataFolder string, logger log.Logger, repoName string, 
 	return utils.SaveStructureByType(file, &kubernetesFileList, repositoryFormatExtension)
 }
 
-func loadKubernetesFiles(dataFolder string, logger log.Logger, repoName string) ([]model.KubernetesFile, error) {
-	var emptyKubernetesFileList = make([]model.KubernetesFile, 0)
-	var kubernetesFileList = model.KubeFileList{
+func loadKubernetesFiles(dataFolder string, logger log.Logger, repoName string) ([]model.KubernetesFileInfo, error) {
+	var emptyKubernetesFileList = make([]model.KubernetesFileInfo, 0)
+	var kubernetesFileList = model.KubernetesFileList{
 		RepoName: repoName,
 		Files:    emptyKubernetesFileList,
 	}

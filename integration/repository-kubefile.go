@@ -9,7 +9,7 @@ type kubernetesFilesRepositoryManager struct {
 	repository model.Repository
 	dataFolder string
 	logger     log.Logger
-	files      []model.KubernetesFile
+	files      []model.KubernetesFileInfo
 }
 
 const (
@@ -86,6 +86,6 @@ func NewRepositoryKubernetesFilesManager(repository model.Repository, dataFolder
 		repository: repository,
 		dataFolder: dataFolder,
 		logger:     logger,
-		files:      make([]model.KubernetesFile, 0),
+		files:      make([]model.KubernetesFileInfo, 0),
 	}).init()
 }
