@@ -9,6 +9,7 @@ type chartsRepositoryManager struct {
 	repository model.Repository
 	dataFolder string
 	logger     log.Logger
+	charts     []model.Chart
 }
 
 const (
@@ -67,14 +68,24 @@ func (c *chartsRepositoryManager) GetInstalledChartVersionDetails(name string, v
 	panic("implement me")
 }
 
-func (c *chartsRepositoryManager) UndeployInstalledChart(name string) (model.Version, error) {
+func (c *chartsRepositoryManager) UnDeployInstalledChart(name string) (model.Version, error) {
 	panic("implement me")
 }
 
-func NewRepositoryChartManager(repository model.Repository, dataFolder string, logger log.Logger) model.RepositoryChartManager {
-	return &chartsRepositoryManager{
+func (c *chartsRepositoryManager) init() (model.RepositoryChartManager, error) {
+	charts, err := loadCharts(c.dataFolder, c.logger, c.repository.Name)
+	if err != nil {
+		return c, err
+	}
+	c.charts = charts
+	return c, nil
+}
+
+func NewRepositoryChartManager(repository model.Repository, dataFolder string, logger log.Logger) (model.RepositoryChartManager, error) {
+	return (&chartsRepositoryManager{
 		repository: repository,
 		dataFolder: dataFolder,
 		logger:     logger,
-	}
+		charts:     make([]model.Chart, 0),
+	}).init()
 }

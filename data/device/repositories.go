@@ -5,13 +5,7 @@ import (
 	"github.com/hellgate75/k8s-deploy/log"
 	"github.com/hellgate75/k8s-deploy/model"
 	"github.com/hellgate75/k8s-deploy/utils"
-	model2 "github.com/hellgate75/k8s-deploy/utils/model"
-	"os"
 )
-
-func getRepositoryFolder(basePath string, repoName string) string {
-	return fmt.Sprintf("%s%crepos%c%s", basePath, os.PathSeparator, os.PathSeparator, repoName)
-}
 
 type repositoryManager struct {
 	baseDataFolder string
@@ -79,22 +73,6 @@ func (rn *repositoryManager) UpdateRepository(id string, r *model.Repository) mo
 			ResponseObjects: response,
 		}
 	}
-}
-
-func checkRepositoryValue(r model.Repository, key string, value string, cond model.Aggregator) bool {
-	switch key {
-	case "name":
-		return model2.CompareValues(value, r.Name, model2.DataTypeString, cond)
-	case "id":
-		return model2.CompareValues(value, r.Id, model2.DataTypeString, cond)
-	case "state":
-		return model2.CompareValues(value, fmt.Sprintf("%v", r.State), model2.DataTypeNumber, cond)
-	case "charts":
-		return model2.CompareValues(value, fmt.Sprintf("%v", len(r.GetCharts())), model2.DataTypeNumber, cond)
-	case "kubernetesFiles":
-		return model2.CompareValues(value, fmt.Sprintf("%v", len(r.GetKubernetesFiles())), model2.DataTypeNumber, cond)
-	}
-	return false
 }
 
 func (rn *repositoryManager) checkFilter(r model.Repository, inclusive bool, q ...model.Query) bool {
@@ -235,13 +213,5 @@ func (rn *repositoryManager) OverrideRepository(id string, r *model.Repository) 
 			Message:         "REPOSITORY Overridden",
 			ResponseObjects: response,
 		}
-	}
-}
-
-func GetRepositoryDataManager(baseFolder string, manager model.RepositoryStorageManager, logger log.Logger) model.RepositoryDataManager {
-	return &repositoryManager{
-		baseDataFolder: baseFolder,
-		manager:        manager,
-		logger:         logger,
 	}
 }

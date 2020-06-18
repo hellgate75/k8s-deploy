@@ -81,7 +81,16 @@ func RestParseResponse(w http.ResponseWriter, r *http.Request, req interface{}) 
 		}
 		w.Header().Set("Content-Type", "application/xml")
 	} else {
-		return errors.New(fmt.Sprintf("Unknown media type : %s", val))
+		//json response
+		byteArr, err = json.Marshal(req)
+		if prettify == "true" {
+			b := bytes.Buffer{}
+			json.Indent(&b, byteArr, "", "  ")
+			byteArr = b.Bytes()
+		}
+
+		w.Header().Set("Content-Type", "application/json")
+		//		return errors.New(fmt.Sprintf("Unknown media type : %s", val))
 	}
 	if err != nil {
 		return err

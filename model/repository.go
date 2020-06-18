@@ -21,7 +21,7 @@ type RepositoryStorageManager interface {
 	// List all repository charts
 	ListRepositoryCharts(id string) ([]Chart, error)
 	// List all repository Kubernetes yaml files
-	ListRepositoryKubeFiles(id string) ([]KubernetesFile, error)
+	ListRepositoryKubernetesFiles(id string) ([]KubernetesFile, error)
 	// Backup an existing repository
 	BackupRepository(id string, archiveFile string, useZipFormat bool) error
 	// Restore an existing repository from zip/tar archive
@@ -29,11 +29,11 @@ type RepositoryStorageManager interface {
 	// Gets Charts Manager for given repository
 	GetRepositoryChartsManager(id string) (RepositoryChartManager, error)
 	// Gets Kubernetes yaml files Manager for given repository
-	GetRepositoryKubeFilesManager(id string) (RepositoryKubeFilesManager, error)
+	GetRepositoryKubernetesFilesManager(id string) (RepositoryKubernetesFilesManager, error)
 	// Gets Charts Manager for given repository
 	GetRepositoryChartsManagerByName(id string) (RepositoryChartManager, error)
 	// Gets Kubernetes yaml files Manager for given repository
-	GetRepositoryKubeFilesManagerByName(id string) (RepositoryKubeFilesManager, error)
+	GetRepositoryKubernetesFilesManagerByName(id string) (RepositoryKubernetesFilesManager, error)
 	// Initializes and loads all repositories
 	Initialize() (RepositoryStorageManager, error)
 	// Reloads all repositories information from storage
@@ -73,35 +73,35 @@ type RepositoryChartManager interface {
 	// Get isntalled Chart version details
 	GetInstalledChartVersionDetails(name string, version string) (Version, error)
 	// Un-deploy installed chart, and collects latest installed version
-	UndeployInstalledChart(name string) (Version, error)
+	UnDeployInstalledChart(name string) (Version, error)
 }
 
 //Describes the Repository Kubernetes yaml files Manager interface
-type RepositoryKubeFilesManager interface {
+type RepositoryKubernetesFilesManager interface {
 	//Verify presence and correctness of a Kubernetes yaml file
-	VerifyKubeFile(name string, version string) error
+	VerifyKubernetesFile(name string, version string) error
 	//Install Kubernetes yaml file version via file
-	InstallKubeFile(name string, version string, file string) error
+	InstallKubernetesFile(name string, version string, file string) error
 	// Delete a version of the Kubernetes yaml file
-	DeleteKubeFileVersion(name string, version string) error
+	DeleteKubernetesFileVersion(name string, version string) error
 	// Delete an entire Kubernetes yaml file, including all versions
-	DeleteEntireKubeFile(name string, version string) error
+	DeleteEntireKubernetesFile(name string, version string) error
 	// Get a yaml template build from a Kubernetes yaml file version
-	GetKubeFileVersionTemplate(name string, version string) (string, error)
+	GetKubernetesFileVersionTemplate(name string, version string) (string, error)
 	// Update and existing Kubernetes yaml file, or createa new Kubernetes yaml file deployment
-	UpdateExistingKubeFile(name string, version string, file string) error
+	UpdateExistingKubernetesFile(name string, version string, file string) error
 	// Collects versions of a Kubernetes yaml file
-	GetKubeFileVersions(name string) ([]Version, error)
+	GetKubernetesFileVersions(name string) ([]Version, error)
 	// Collects project versions of a Kubernetes yaml file, ready for job scheduling
-	GetKubeFileProjectVersions(name string) ([]ProjectKubeFile, error)
+	GetKubernetesFileProjectVersions(name string) ([]ProjectKubeFile, error)
 	// Execute deploy of a Kubernetes yaml file and collects the output
-	DeployInstallKubeFile(name string, version string) (string, error)
+	DeployInstallKubernetesFile(name string, version string) (string, error)
 	// Execute upgrade of a Kubernetes yaml file and collects the output
-	DeployUpgradeKubeFile(name string, version string, force bool) (string, error)
+	DeployUpgradeKubernetesFile(name string, version string, force bool) (string, error)
 	// Verify and return Kubernetes yaml file version, or an error in case Kubernetes yaml file is not installed
-	GetInstalledKubeFileVersion(name string) (Version, error)
-	// Get isntalled Kubernetes yaml file version details
-	GetInstalledKubeFileVersionDetails(name string, version string) (Version, error)
+	GetInstalledKubernetesFileVersion(name string) (Version, error)
+	// Get installed Kubernetes yaml file version details
+	GetInstalledKubernetesFileVersionDetails(name string, version string) (Version, error)
 	// Un-deploy installed Kubernetes yaml file, and collects latest installed version
-	UndeployInstalledKubeFile(name string) (Version, error)
+	UnDeployInstalledKubernetesFile(name string) (Version, error)
 }

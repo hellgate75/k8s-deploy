@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	repositoryIndeTemplate          = "%s%crepositories.%v"
+	repositoryIndexTemplate         = "%s%crepositories.%v"
 	repositoryFormatExtension       = utils.YAML_FORMAT
 	defaultRepositoryName           = "__default"
 	repositoryDetailsIndexTemplate  = "%s%crepositories%c%s%cindex.%v"
@@ -63,7 +63,7 @@ func (s *repositoryStorageManager) containsRepositoryId(id string) bool {
 	return false
 }
 
-func (s *repositoryStorageManager) getDefefaultRepositoryId() string {
+func (s *repositoryStorageManager) getDefaultRepositoryId() string {
 	for _, repo := range s.repositories.Repositories {
 		if repo.Name == defaultRepositoryName {
 			return repo.Id
@@ -122,7 +122,7 @@ func (s *repositoryStorageManager) GetRepositoryById(id string) (*model.Reposito
 			//Sets the discovered charts in the repository structure
 			repository.ReplaceCharts(chartsFileList.Charts...)
 			// Load kubernetes files related to the repository
-			file = fmt.Sprintf(repositoryKubefilesIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
+			file = fmt.Sprintf(repositoryKubernetesFilesIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
 			var kubernetesFileList = model.KubeFileList{
 				RepoName: repo.Name,
 				Files:    make([]model.KubernetesFile, 0),
@@ -236,29 +236,27 @@ func (s *repositoryStorageManager) UpdateRepository(id string, r model.Repositor
 	} else {
 		if oldName != repo.Name {
 			if s.logger != nil {
-				s.logger.Debugf("Renaming folder for repository: %s to repository %s", oldName, repo.Name)
+				s.logger.Debugf("Renaming repository: %s to repository %s", oldName, repo.Name)
 			}
-			err = os.Rename(oldFolder, newFolder)
+			err = s.RenameRepository(oldName, repo.Name)
 			if err != nil {
 				return nil, err
 			}
+			rN, err := s.GetRepository(repo.Name)
+			if err != nil {
+				return nil, err
+			}
+			r = *rN
 		} else {
 			if s.logger != nil {
 				s.logger.Debugf("No name changes in repository: %s", repo.Name)
 			}
+			r.ReplaceCharts(repo.GetCharts()...)
+			r.ReplaceKubernetesFiles(repo.GetKubernetesFiles()...)
 		}
 	}
 
-	err = saveRepository(s.dataFolder, s.logger, repo.Name, *repo)
-	if err != nil {
-		return nil, err
-	}
-
-	err = saveCharts(s.dataFolder, s.logger, repo.Name, repo.GetCharts())
-	if err != nil {
-		return nil, err
-	}
-	err = saveKubernetesFiles(s.dataFolder, s.logger, repo.Name, repo.GetKubernetesFiles())
+	err = s.SaveRepository(r)
 	if err != nil {
 		return nil, err
 	}
@@ -378,7 +376,7 @@ func (s *repositoryStorageManager) OverrideRepository(id string, r model.Reposit
 				}
 			}
 			var oldRepositoryChartsFolder = fmt.Sprintf(repositoryChartsFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName, os.PathSeparator)
-			var oldRepositoryKubefilesFolder = fmt.Sprintf(repositoryKubefilesFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName, os.PathSeparator)
+			var oldRepositoryKubefilesFolder = fmt.Sprintf(repositoryKubernetesFilesFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, oldName, os.PathSeparator)
 			_, _, err = utils.MoveFileToFolder(oldRepositoryChartsFolder, mergeFolder)
 			if err != nil {
 				if s.logger != nil {
@@ -497,7 +495,7 @@ func (s *repositoryStorageManager) DeleteRepositoryById(id string) error {
 	if !s.containsRepositoryId(id) {
 		return errors.New(fmt.Sprintf("Repository id %s not present", id))
 	}
-	if id == s.getDefefaultRepositoryId() {
+	if id == s.getDefaultRepositoryId() {
 		return errors.New(fmt.Sprintf("Repository id %s cannot be deleted, it's the default repository", id))
 	}
 	if r, err := s.GetRepositoryById(id); err == nil {
@@ -565,7 +563,7 @@ func (s *repositoryStorageManager) PurgeRepositoryById(id string) error {
 	if !s.containsRepositoryId(id) {
 		return errors.New(fmt.Sprintf("Repository id %s not present", id))
 	}
-	if id == s.getDefefaultRepositoryId() {
+	if id == s.getDefaultRepositoryId() {
 		return errors.New(fmt.Sprintf("Repository id %s cannot be deleted, it's the default repository", id))
 	}
 	var deleted = false
@@ -710,7 +708,7 @@ func (s *repositoryStorageManager) ListRepositoryCharts(id string) ([]model.Char
 	return outList, err
 }
 
-func (s *repositoryStorageManager) ListRepositoryKubeFiles(id string) ([]model.KubernetesFile, error) {
+func (s *repositoryStorageManager) ListRepositoryKubernetesFiles(id string) ([]model.KubernetesFile, error) {
 	var err error
 	defer func() {
 		if r := recover(); r != nil {
@@ -726,12 +724,12 @@ func (s *repositoryStorageManager) ListRepositoryKubeFiles(id string) ([]model.K
 	var found = false
 	for _, repo := range s.repositories.Repositories {
 		if repo.Id == id {
-			var folder = fmt.Sprintf(repositoryKubefilesFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator)
+			var folder = fmt.Sprintf(repositoryKubernetesFilesFolderTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator)
 			if _, err := os.Stat(folder); err != nil {
 				return outList, err
 			} else {
 				found = true
-				var file = fmt.Sprintf(repositoryKubefilesIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
+				var file = fmt.Sprintf(repositoryKubernetesFilesIndexTemplate, s.dataFolder, os.PathSeparator, os.PathSeparator, repo.Name, os.PathSeparator, os.PathSeparator, repositoryFormatExtension)
 				if fs, err := os.Stat(file); err == nil {
 					if fs.IsDir() {
 						if s.logger != nil {
@@ -885,15 +883,15 @@ func (s *repositoryStorageManager) GetRepositoryChartsManager(id string) (model.
 	if err != nil {
 		return nil, err
 	}
-	return NewRepositoryChartManager(*r, s.dataFolder, s.logger), nil
+	return NewRepositoryChartManager(*r, s.dataFolder, s.logger)
 }
 
-func (s *repositoryStorageManager) GetRepositoryKubeFilesManager(id string) (model.RepositoryKubeFilesManager, error) {
+func (s *repositoryStorageManager) GetRepositoryKubernetesFilesManager(id string) (model.RepositoryKubernetesFilesManager, error) {
 	r, err := s.GetRepositoryById(id)
 	if err != nil {
 		return nil, err
 	}
-	return NewRepositoryKubeFilesManager(*r, s.dataFolder, s.logger), nil
+	return NewRepositoryKubernetesFilesManager(*r, s.dataFolder, s.logger)
 }
 
 func (s *repositoryStorageManager) GetRepositoryChartsManagerByName(name string) (model.RepositoryChartManager, error) {
@@ -901,15 +899,15 @@ func (s *repositoryStorageManager) GetRepositoryChartsManagerByName(name string)
 	if err != nil {
 		return nil, err
 	}
-	return NewRepositoryChartManager(*r, s.dataFolder, s.logger), nil
+	return NewRepositoryChartManager(*r, s.dataFolder, s.logger)
 }
 
-func (s *repositoryStorageManager) GetRepositoryKubeFilesManagerByName(name string) (model.RepositoryKubeFilesManager, error) {
+func (s *repositoryStorageManager) GetRepositoryKubernetesFilesManagerByName(name string) (model.RepositoryKubernetesFilesManager, error) {
 	r, err := s.GetRepository(name)
 	if err != nil {
 		return nil, err
 	}
-	return NewRepositoryKubeFilesManager(*r, s.dataFolder, s.logger), nil
+	return NewRepositoryKubernetesFilesManager(*r, s.dataFolder, s.logger)
 }
 
 func (s *repositoryStorageManager) Initialize() (model.RepositoryStorageManager, error) {
@@ -920,7 +918,7 @@ func (s *repositoryStorageManager) Initialize() (model.RepositoryStorageManager,
 			return nil, err
 		}
 	}
-	var file = fmt.Sprintf(repositoryIndeTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
+	var file = fmt.Sprintf(repositoryIndexTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
 	if utils.ExistsFileOrFolder(file) {
 		s.logger.Infof("RepositoryStorageManager::Initialize() load existing repositories ...")
 		return s, s.Refresh()
@@ -928,7 +926,6 @@ func (s *repositoryStorageManager) Initialize() (model.RepositoryStorageManager,
 		s.logger.Infof("RepositoryStorageManager::Initialize() create new default repositories ...")
 		return s, s.createDefault()
 	}
-	return s, nil
 }
 
 func (s *repositoryStorageManager) createDefault() error {
@@ -949,7 +946,7 @@ func (s *repositoryStorageManager) SavePoint() error {
 		s.Unlock()
 	}()
 	s.Lock()
-	var file = fmt.Sprintf(repositoryIndeTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
+	var file = fmt.Sprintf(repositoryIndexTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
 	if utils.ExistsFileOrFolder(file) {
 		_ = utils.DeleteFileOrFolder(file)
 	}
@@ -966,7 +963,7 @@ func (s *repositoryStorageManager) Refresh() error {
 		s.RUnlock()
 	}()
 	s.RLock()
-	var file = fmt.Sprintf(repositoryIndeTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
+	var file = fmt.Sprintf(repositoryIndexTemplate, s.dataFolder, os.PathSeparator, repositoryFormatExtension)
 	err = utils.LoadStructureByType(file, s.repositories, repositoryFormatExtension)
 	return err
 }

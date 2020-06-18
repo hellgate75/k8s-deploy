@@ -33,14 +33,14 @@ func (rn *repositoryManager) AddRepository(n string) model.DataResponse {
 	}
 }
 
-func (rn *repositoryManager) DeleteRepositories(q ...model.Query) model.DataResponse {
+func (rn *repositoryManager) DeleteRepositories(inclusive bool, q ...model.Query) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
 	}
 }
 
-func (rn *repositoryManager) PurgeRepositories(q ...model.Query) model.DataResponse {
+func (rn *repositoryManager) PurgeRepositories(inclusive bool, q ...model.Query) model.DataResponse {
 	return model.DataResponse{
 		Success: false,
 		Message: "Not Implemented",
